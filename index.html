@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a3550">
+  <link rel="manifest" href="manifest.json">
+  <title>France 2026</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="page">
+
+    <!-- ── Top Bar ───────────────────────────── -->
+    <header id="topbar">
+      <div class="topbar-inner">
+        <span class="topbar-flag">🇫🇷</span>
+        <span class="topbar-title">France 2026</span>
+        <span class="topbar-countdown" id="topbar-countdown"></span>
+      </div>
+    </header>
+
+    <!-- ── Hero: Progress + Next Up ─────────── -->
+    <section class="hero">
+      <div class="hero-inner">
+
+        <!-- Circular progress ring -->
+        <div class="progress-ring-wrap">
+          <svg class="progress-ring" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-fill" cx="50" cy="50" r="40"
+              stroke-dasharray="251.2"
+              stroke-dashoffset="251.2"
+              transform="rotate(-90 50 50)"/>
+          </svg>
+          <div class="ring-label">
+            <div class="ring-pct" id="ring-pct">0%</div>
+            <div class="ring-sub" id="ring-sub">0 / 0</div>
+          </div>
+        </div>
+
+        <!-- Next 3 upcoming tasks -->
+        <div class="next-up">
+          <div class="next-up-heading">Next Up</div>
+          <div id="next-up-list"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Stats strip ───────────────────────── -->
+    <div class="stats-strip">
+      <div class="stat-item">
+        <span class="stat-icon">✈️</span>
+        <span class="stat-label" id="stat-days">— days to departure</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-icon">💰</span>
+        <span class="stat-label" id="stat-budget">Loading budget…</span>
+      </div>
+    </div>
+
+    <!-- ── To-Do Categories ───────────────────── -->
+    <section class="section-wrap" id="todos-section">
+      <div class="section-header">
+        <h2 class="section-title">Planning Checklist</h2>
+      </div>
+      <div id="categories-list"></div>
+    </section>
+
+    <!-- ── Itinerary ─────────────────────────── -->
+    <section class="section-wrap" id="itinerary-section">
+      <div class="section-header">
+        <h2 class="section-title">🗓 Itinerary</h2>
+        <span class="section-sub">Jul 17 – Aug 1</span>
+      </div>
+      <div id="itinerary-list"></div>
+    </section>
+
+    <footer class="page-footer">Made with ♡ for an unforgettable summer</footer>
+
+  </div>
+
+  <!-- ── PIN Modal ─────────────────────────────── -->
+  <div id="pin-overlay" class="pin-overlay hidden">
+    <div class="pin-card">
+      <div class="pin-icon">🔒</div>
+      <div class="pin-title">Private Section</div>
+      <div class="pin-hint">Enter your PIN to continue</div>
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-error hidden" id="pin-error">Incorrect PIN — try again</div>
+      <div class="pin-keypad">
+        <button class="key" data-k="1">1</button>
+        <button class="key" data-k="2">2</button>
+        <button class="key" data-k="3">3</button>
+        <button class="key" data-k="4">4</button>
+        <button class="key" data-k="5">5</button>
+        <button class="key" data-k="6">6</button>
+        <button class="key" data-k="7">7</button>
+        <button class="key" data-k="8">8</button>
+        <button class="key" data-k="9">9</button>
+        <button class="key key-cancel" data-k="cancel">✕</button>
+        <button class="key" data-k="0">0</button>
+        <button class="key key-del" data-k="del">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Task Detail Drawer ────────────────────── -->
+  <div id="drawer-overlay" class="drawer-overlay hidden">
+    <div id="drawer" class="drawer">
+      <div class="drawer-handle"></div>
+      <div id="drawer-content"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
