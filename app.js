@@ -226,7 +226,7 @@ function renderChecklist() {
   if (!wrap) return;
 
   const tasks = allTasks()
-    .filter(t => t.catId !== 'proposal') // proposal rendered separately
+    .filter(t => proposalUnlocked ? t.catId !== 'proposal' : true)
     .filter(filterPass)
     .sort(sortByDue);
 
@@ -257,6 +257,32 @@ function renderChecklist() {
 }
 
 function renderTaskRow(t) {
+  if (t.catId === 'proposal' && !proposalUnlocked) {
+    const info = dueInfo(t.dueDate);
+    const p    = parseDateParts(t.dueDate);
+    const dateCell = p
+      ? `<div class="task-date ${info.cls}"><span class="d">${p.day}</span><span class="m">${p.mon}</span></div>`
+      : `<div class="task-date no-date"><span class="d">Anytime</span></div>`;
+    return `<div class="task task-locked" data-locked-proposal="true">
+      <div class="task-lock-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <rect x="4" y="10.5" width="16" height="11" rx="1.5"/>
+          <path d="M8 10.5V7a4 4 0 018 0v3.5"/>
+        </svg>
+      </div>
+      ${dateCell}
+      <div class="task-body">
+        <div class="task-title task-title-blur">${esc(t.title)}</div>
+        <div class="task-meta">
+          <span class="task-category">Private</span>
+          <span class="dot"></span>
+          <span style="font-style:italic;color:var(--ink-muted);font-size:0.72rem;">Tap to unlock</span>
+        </div>
+      </div>
+      <span class="task-arrow">›</span>
+    </div>`;
+  }
+
   const s      = state[t.id] || {};
   const isDone = s.status === 'done';
   const info   = dueInfo(t.dueDate);
@@ -553,6 +579,12 @@ function setupEvents() {
       state[taskId] = { ...state[taskId], status: cur === 'done' ? 'not-started' : 'done' };
       saveState();
       renderAll();
+      return;
+    }
+
+    // Locked proposal row
+    if (e.target.closest('[data-locked-proposal]')) {
+      showPinModal('proposal');
       return;
     }
 

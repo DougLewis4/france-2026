@@ -686,6 +686,21 @@ body {
 .task:first-child { border-top: none; }
 .task:hover { background: var(--paper-alt); }
 .task.done { opacity: 0.5; }
+.task.task-locked { cursor: pointer; }
+.task-lock-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-muted);
+}
+.task-title-blur {
+  filter: blur(5px);
+  user-select: none;
+  pointer-events: none;
+}
 
 .task-check {
   width: 20px;
