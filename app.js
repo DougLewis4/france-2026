@@ -9,7 +9,6 @@ function esc(str) {
 }
 
 const STORAGE_KEY = 'france2026_v2';
-const TWEAKS_KEY  = 'france2026_tweaks_v1';
 const PIN_SECRET  = '1261';
 const DEPARTURE   = new Date('2026-07-17T15:00:00');
 
@@ -513,79 +512,29 @@ function handlePinKey(k) {
 }
 
 // ============================================================
-// TWEAKS
+// LAYOUT / THEME (fixed settings — no tweaks panel)
 // ============================================================
-const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "theme": "provencal",
-  "type": "mixed",
-  "layout": "dashboard",
-  "hero": "full",
-  "density": "cozy"
-}/*EDITMODE-END*/;
-
-let tweaks = { ...TWEAK_DEFAULTS };
-try { const raw = localStorage.getItem(TWEAKS_KEY); if (raw) tweaks = { ...tweaks, ...JSON.parse(raw) }; } catch(e) {}
-
 function applyTweaks() {
   const root = document.documentElement;
-  if (tweaks.theme === 'provencal') root.removeAttribute('data-theme');
-  else root.setAttribute('data-theme', tweaks.theme);
+  root.setAttribute('data-theme',   'navy');
+  root.setAttribute('data-layout',  'tabbed');
+  root.setAttribute('data-hero',    'full');
+  root.setAttribute('data-density', 'spacious');
+  // data-type omitted → mixed (default)
 
-  if (tweaks.type === 'mixed') root.removeAttribute('data-type');
-  else root.setAttribute('data-type', tweaks.type);
-
-  root.setAttribute('data-layout', tweaks.layout);
-  root.setAttribute('data-hero',   tweaks.hero);
-  root.setAttribute('data-density',tweaks.density);
-
-  // tabbed: respect currentPane
   const chk = document.querySelector('.pane-checklist');
   const itn = document.querySelector('.pane-itinerary');
   if (chk && itn) {
-    if (tweaks.layout === 'tabbed') {
-      chk.classList.toggle('is-hidden', currentPane !== 'checklist');
-      itn.classList.toggle('is-hidden', currentPane !== 'itinerary');
-    } else {
-      chk.classList.remove('is-hidden');
-      itn.classList.remove('is-hidden');
-    }
+    chk.classList.toggle('is-hidden', currentPane !== 'checklist');
+    itn.classList.toggle('is-hidden', currentPane !== 'itinerary');
   }
 
-  // reflect in tweak panel
-  document.querySelectorAll('.tweak-seg').forEach(seg => {
-    const key = seg.dataset.tweak;
-    seg.querySelectorAll('button').forEach(b => {
-      b.classList.toggle('active', b.dataset.val === tweaks[key]);
-    });
-  });
-
-  // Reflect in pane switch
   document.querySelectorAll('.pane-switch button').forEach(b => {
     b.classList.toggle('active', b.dataset.pane === currentPane);
   });
 }
 
-function setTweak(key, val) {
-  tweaks[key] = val;
-  localStorage.setItem(TWEAKS_KEY, JSON.stringify(tweaks));
-  try {
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [key]: val } }, '*');
-  } catch(e) {}
-  applyTweaks();
-}
-
-function setupTweaksListener() {
-  window.addEventListener('message', e => {
-    const d = e.data;
-    if (!d) return;
-    if (d.type === '__activate_edit_mode') {
-      document.getElementById('tweaks-panel').classList.add('visible');
-    } else if (d.type === '__deactivate_edit_mode') {
-      document.getElementById('tweaks-panel').classList.remove('visible');
-    }
-  });
-  try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch(e) {}
-}
+function setupTweaksListener() {}
 
 // ============================================================
 // EVENTS
@@ -661,13 +610,6 @@ function setupEvents() {
     if (key) { handlePinKey(key.dataset.k); return; }
     if (e.target.id === 'pin-overlay') { hidePinModal(); return; }
 
-    // Tweak buttons
-    const tw = e.target.closest('[data-tweak-btn]');
-    if (tw) {
-      const key = tw.closest('.tweak-seg').dataset.tweak;
-      setTweak(key, tw.dataset.val);
-      return;
-    }
   });
 
   // Keyboard support for PIN
