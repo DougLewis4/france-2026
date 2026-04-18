@@ -4,94 +4,207 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#1a3550">
-  <link rel="manifest" href="manifest.json">
-  <title>France 2026</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#f5ecd9">
+  <title>France 2026 — An Itinerary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
-<body>
+<body data-screen-label="France 2026 Dashboard">
 
-  <div id="page">
-
-    <!-- ── Top Bar ───────────────────────────── -->
-    <header id="topbar">
-      <div class="topbar-inner">
-        <span class="topbar-flag">🇫🇷</span>
-        <span class="topbar-title">France 2026</span>
-        <span class="topbar-countdown" id="topbar-countdown"></span>
+  <!-- ── Masthead ───────────────────────────── -->
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="masthead-left">
+        <span class="rule-pill">Vol. I · Été 2026</span>
       </div>
-    </header>
+      <div class="masthead-center">
+        <div class="masthead-title">France 2026</div>
+        <div class="masthead-sub">Provence · Paris · A Wedding</div>
+      </div>
+      <div class="masthead-right">
+        <span class="rule-pill accent" id="masthead-countdown">— days</span>
+      </div>
+    </div>
+  </header>
 
-    <!-- ── Hero: Progress + Next Up ─────────── -->
-    <section class="hero">
-      <div class="hero-inner">
+  <main class="page">
+    <div class="dashboard">
 
-        <!-- Circular progress ring -->
-        <div class="progress-ring-wrap">
-          <svg class="progress-ring" viewBox="0 0 100 100">
-            <circle class="ring-bg" cx="50" cy="50" r="40"/>
-            <circle class="ring-fill" id="ring-fill" cx="50" cy="50" r="40"
-              stroke-dasharray="251.2"
-              stroke-dashoffset="251.2"
-              transform="rotate(-90 50 50)"/>
-          </svg>
-          <div class="ring-label">
-            <div class="ring-pct" id="ring-pct">0%</div>
-            <div class="ring-sub" id="ring-sub">0 / 0</div>
+      <!-- ── Sidebar ─────────────────────────── -->
+      <aside class="sidebar">
+
+        <!-- Hero countdown -->
+        <div class="hero-card">
+          <div class="hero-eyebrow">Until Departure</div>
+          <div class="hero-days" id="hero-days">—</div>
+          <div class="hero-days-label" id="hero-days-label">days to departure</div>
+
+          <div class="hero-ring-wrap">
+            <svg class="hero-ring" viewBox="0 0 140 140">
+              <circle class="ring-bg"   cx="70" cy="70" r="60"/>
+              <circle class="ring-fill" id="ring-fill" cx="70" cy="70" r="60"
+                stroke-dasharray="376.99" stroke-dashoffset="376.99"/>
+            </svg>
+            <div class="hero-ring-label">
+              <div class="hero-ring-pct" id="ring-pct">0%</div>
+              <div class="hero-ring-sub" id="ring-sub">0 of 0 done</div>
+            </div>
+          </div>
+
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <div class="hero-meta-value" id="hero-trip">16 days</div>
+              <div class="hero-meta-label">In France</div>
+            </div>
+            <div class="hero-meta-divider"></div>
+            <div class="hero-meta-item">
+              <div class="hero-meta-value" id="hero-budget">$—</div>
+              <div class="hero-meta-label">Estimated</div>
+            </div>
           </div>
         </div>
 
-        <!-- Next 3 upcoming tasks -->
-        <div class="next-up">
-          <div class="next-up-heading">Next Up</div>
-          <div id="next-up-list"></div>
+        <!-- Next up -->
+        <div class="card nextup-card">
+          <div class="card-title">Next Up <span class="card-sub">what's due</span></div>
+          <div class="nextup-list" id="nextup-list"></div>
         </div>
 
-      </div>
-    </section>
+        <!-- Budget -->
+        <div class="card budget-card">
+          <div class="card-title">Budget <span class="card-sub">running total</span></div>
+          <div class="budget-row">
+            <span class="label">Spent</span>
+            <span class="value" id="budget-actual">$0</span>
+          </div>
+          <div class="budget-row total">
+            <span class="label">Estimated</span>
+            <span class="value" id="budget-est">$0</span>
+          </div>
+          <div class="budget-bar"><div class="budget-bar-fill" id="budget-bar"></div></div>
+        </div>
+      </aside>
 
-    <!-- ── Stats strip ───────────────────────── -->
-    <div class="stats-strip">
-      <div class="stat-item">
-        <span class="stat-icon">✈️</span>
-        <span class="stat-label" id="stat-days">— days to departure</span>
+      <!-- ── Main pane ───────────────────────── -->
+      <section class="main">
+
+        <div class="pane-switch">
+          <button data-pane="checklist" class="active">Checklist</button>
+          <button data-pane="itinerary">Itinerary</button>
+        </div>
+
+        <!-- Checklist pane -->
+        <div class="pane-checklist" data-screen-label="Checklist">
+          <div class="section-head">
+            <div class="section-head-left">
+              <div class="section-eyebrow">— To Do —</div>
+              <h2 class="section-title">The Planning Checklist</h2>
+            </div>
+            <div class="section-sub">Sorted by when it needs doing</div>
+          </div>
+
+          <div class="filter-bar">
+            <button data-filter="all"    class="active">All</button>
+            <button data-filter="open">Open</button>
+            <button data-filter="booked">In progress</button>
+            <button data-filter="done">Completed</button>
+          </div>
+
+          <div id="checklist-wrap"></div>
+
+          <!-- Proposal locked / unlocked panel -->
+          <div id="proposal-wrap"></div>
+        </div>
+
+        <!-- Itinerary pane -->
+        <div class="pane-itinerary" data-screen-label="Itinerary">
+          <figure class="itin-banner">
+            <img src="images/provence-banner.jpg?v=2" alt="" class="itin-banner-img"
+                 onerror="this.classList.add('missing')"/>
+            <div class="itin-banner-placeholder">
+              <span class="itin-banner-slot">images/provence-banner.jpg</span>
+              <span class="itin-banner-hint">drop a wide Provence photo here · ~2000×700</span>
+            </div>
+            <figcaption class="itin-banner-caption">Provence · Été 2026</figcaption>
+          </figure>
+          <div class="section-head">
+            <div class="section-head-left">
+              <div class="section-eyebrow">— Itinerary —</div>
+              <h2 class="section-title">Sixteen Days in France</h2>
+            </div>
+            <div class="section-sub">Jul 17 — Aug 1, 2026</div>
+          </div>
+          <div class="itinerary" id="itinerary-wrap"></div>
+        </div>
+
+        <div class="footer">— with love, for an unforgettable summer —</div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ── Tweaks ─────────────────────────── -->
+  <div class="tweaks" id="tweaks-panel">
+    <div class="tweaks-head">
+      <div class="tweaks-title">Tweaks</div>
+    </div>
+    <div class="tweaks-body">
+      <div class="tweak-group">
+        <div class="tweak-label">Theme</div>
+        <div class="tweak-seg" data-tweak="theme">
+          <button data-tweak-btn data-val="provencal">Provençal</button>
+          <button data-tweak-btn data-val="navy">Navy</button>
+          <button data-tweak-btn data-val="mono">Mono</button>
+        </div>
       </div>
-      <div class="stat-divider"></div>
-      <div class="stat-item">
-        <span class="stat-icon">💰</span>
-        <span class="stat-label" id="stat-budget">Loading budget…</span>
+      <div class="tweak-group">
+        <div class="tweak-label">Typography</div>
+        <div class="tweak-seg" data-tweak="type">
+          <button data-tweak-btn data-val="mixed">Mixed</button>
+          <button data-tweak-btn data-val="serif">Serif</button>
+          <button data-tweak-btn data-val="sans">Sans</button>
+        </div>
+      </div>
+      <div class="tweak-group">
+        <div class="tweak-label">Layout</div>
+        <div class="tweak-seg" data-tweak="layout">
+          <button data-tweak-btn data-val="dashboard">Dashboard</button>
+          <button data-tweak-btn data-val="tabbed">Tabbed</button>
+          <button data-tweak-btn data-val="single">Single</button>
+        </div>
+      </div>
+      <div class="tweak-group">
+        <div class="tweak-label">Hero</div>
+        <div class="tweak-seg" data-tweak="hero">
+          <button data-tweak-btn data-val="full">Full</button>
+          <button data-tweak-btn data-val="ring">Ring</button>
+          <button data-tweak-btn data-val="compact">Compact</button>
+        </div>
+      </div>
+      <div class="tweak-group">
+        <div class="tweak-label">Density</div>
+        <div class="tweak-seg" data-tweak="density">
+          <button data-tweak-btn data-val="spacious">Spacious</button>
+          <button data-tweak-btn data-val="cozy">Cozy</button>
+          <button data-tweak-btn data-val="compact">Compact</button>
+        </div>
       </div>
     </div>
-
-    <!-- ── To-Do Categories ───────────────────── -->
-    <section class="section-wrap" id="todos-section">
-      <div class="section-header">
-        <h2 class="section-title">Planning Checklist</h2>
-      </div>
-      <div id="categories-list"></div>
-    </section>
-
-    <!-- ── Itinerary ─────────────────────────── -->
-    <section class="section-wrap" id="itinerary-section">
-      <div class="section-header">
-        <h2 class="section-title">🗓 Itinerary</h2>
-        <span class="section-sub">Jul 17 – Aug 1</span>
-      </div>
-      <div id="itinerary-list"></div>
-    </section>
-
-    <footer class="page-footer">Made with ♡ for an unforgettable summer</footer>
-
   </div>
 
-  <!-- ── PIN Modal ─────────────────────────────── -->
+  <!-- ── PIN ─────────────────────────── -->
   <div id="pin-overlay" class="pin-overlay hidden">
     <div class="pin-card">
-      <div class="pin-icon">🔒</div>
-      <div class="pin-title">Private Section</div>
+      <div class="pin-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="10.5" width="16" height="11" rx="1.5"/>
+          <path d="M8 10.5V7a4 4 0 018 0v3.5"/>
+        </svg>
+      </div>
+      <div class="pin-title">Private section</div>
       <div class="pin-hint">Enter your PIN to continue</div>
-      <div class="pin-dots" id="pin-dots">
+      <div class="pin-dots">
         <div class="pin-dot" id="d0"></div>
         <div class="pin-dot" id="d1"></div>
         <div class="pin-dot" id="d2"></div>
@@ -99,30 +212,45 @@
       </div>
       <div class="pin-error hidden" id="pin-error">Incorrect PIN — try again</div>
       <div class="pin-keypad">
-        <button class="key" data-k="1">1</button>
-        <button class="key" data-k="2">2</button>
-        <button class="key" data-k="3">3</button>
-        <button class="key" data-k="4">4</button>
-        <button class="key" data-k="5">5</button>
-        <button class="key" data-k="6">6</button>
-        <button class="key" data-k="7">7</button>
-        <button class="key" data-k="8">8</button>
-        <button class="key" data-k="9">9</button>
-        <button class="key key-cancel" data-k="cancel">✕</button>
-        <button class="key" data-k="0">0</button>
-        <button class="key key-del" data-k="del">⌫</button>
+        <button class="pin-key" data-k="1">1</button>
+        <button class="pin-key" data-k="2">2</button>
+        <button class="pin-key" data-k="3">3</button>
+        <button class="pin-key" data-k="4">4</button>
+        <button class="pin-key" data-k="5">5</button>
+        <button class="pin-key" data-k="6">6</button>
+        <button class="pin-key" data-k="7">7</button>
+        <button class="pin-key" data-k="8">8</button>
+        <button class="pin-key" data-k="9">9</button>
+        <button class="pin-key cancel" data-k="cancel">✕</button>
+        <button class="pin-key" data-k="0">0</button>
+        <button class="pin-key del" data-k="del">⌫</button>
       </div>
     </div>
   </div>
 
-  <!-- ── Task Detail Drawer ────────────────────── -->
+  <!-- ── Drawer ─────────────────────────── -->
   <div id="drawer-overlay" class="drawer-overlay hidden">
-    <div id="drawer" class="drawer">
+    <div class="drawer">
       <div class="drawer-handle"></div>
-      <div id="drawer-content"></div>
+      <div class="drawer-content" id="drawer-content"></div>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- Countdown pill in masthead (small, always visible) -->
+  <script>
+    (function(){
+      function tickMasthead(){
+        var DEP = new Date('2026-07-17T15:00:00');
+        var diff = Math.ceil((DEP - new Date()) / 86400000);
+        var el = document.getElementById('masthead-countdown');
+        if (el) el.textContent = diff > 0 ? (diff + ' days') : 'Bon voyage!';
+      }
+      tickMasthead();
+      setInterval(tickMasthead, 60000);
+    })();
+  </script>
+
+  <script src="data.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
