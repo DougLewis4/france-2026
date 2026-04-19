@@ -9,16 +9,12 @@ function esc(str) {
 }
 
 const STORAGE_KEY = 'france2026_v2';
-const PIN_SECRET  = '1261';
 const DEPARTURE   = new Date('2026-07-17T15:00:00');
 
 let state          = {};
 let itinExpanded   = {};
 let housingData    = {};
 let restaurantData = [];
-let proposalUnlocked = sessionStorage.getItem('f26_unlocked') === '1';
-let pendingUnlockCatId = null;
-let pinBuffer    = '';
 let openDrawerTaskId = null;
 let currentFilter = 'all';  // all | open | booked | done
 let currentPane   = 'checklist'; // for tabbed layout
@@ -65,16 +61,6 @@ function saveState() {
 function allTasks() {
   return CATEGORIES.flatMap(c => c.tasks.map(t => ({ ...t, catId: c.id, catLabel: c.label })));
 }
-function visibleTasks() {
-  return allTasks().filter(t => {
-    if (t.catId === 'proposal' && !proposalUnlocked) return false;
-    return true;
-  });
-}
-function proposalTasks() {
-  const cat = CATEGORIES.find(c => c.id === 'proposal');
-  return cat ? cat.tasks.map(t => ({ ...t, catId: 'proposal', catLabel: cat.label })) : [];
-}
 function dueInfo(dueDate) {
   if (!dueDate) return { cls: 'none', label: '—', diff: Infinity };
   const today = new Date(); today.setHours(0,0,0,0);
@@ -112,7 +98,7 @@ function renderHero() {
   if (label) label.textContent = diff > 0 ? 'days to departure' : 'bon voyage!';
 
   // Ring
-  const tasks = visibleTasks();
+  const tasks = allTasks();
   const total = tasks.length;
   const done  = tasks.filter(t => state[t.id]?.status === 'done').length;
   const pct   = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -138,7 +124,7 @@ function renderHero() {
 
 function totalBudget() {
   let est = 0, actual = 0;
-  visibleTasks().forEach(t => {
+  allTasks().forEach(t => {
     est    += t.estimatedCost    || 0;
     actual += state[t.id]?.actualCost || 0;
   });
@@ -149,7 +135,7 @@ function totalBudget() {
 // RENDER: Next Up
 // ============================================================
 function renderNextUp() {
-  const upcoming = visibleTasks()
+  const upcoming = allTasks()
     .filter(t => state[t.id]?.status !== 'done' && t.dueDate)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     .slice(0, 4);
@@ -235,7 +221,6 @@ function renderChecklist() {
   if (!wrap) return;
 
   const tasks = allTasks()
-    .filter(t => proposalUnlocked ? t.catId !== 'proposal' : true)
     .filter(filterPass)
     .sort(sortByDue);
 
@@ -266,32 +251,6 @@ function renderChecklist() {
 }
 
 function renderTaskRow(t) {
-  if (t.catId === 'proposal' && !proposalUnlocked) {
-    const info = dueInfo(t.dueDate);
-    const p    = parseDateParts(t.dueDate);
-    const dateCell = p
-      ? `<div class="task-date ${info.cls}"><span class="d">${p.day}</span><span class="m">${p.mon}</span></div>`
-      : `<div class="task-date no-date"><span class="d">Anytime</span></div>`;
-    return `<div class="task task-locked" data-locked-proposal="true">
-      <div class="task-lock-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-          <rect x="4" y="10.5" width="16" height="11" rx="1.5"/>
-          <path d="M8 10.5V7a4 4 0 018 0v3.5"/>
-        </svg>
-      </div>
-      ${dateCell}
-      <div class="task-body">
-        <div class="task-title task-title-blur">${esc(t.title)}</div>
-        <div class="task-meta">
-          <span class="task-category">Private</span>
-          <span class="dot"></span>
-          <span style="font-style:italic;color:var(--ink-muted);font-size:0.72rem;">Tap to unlock</span>
-        </div>
-      </div>
-      <span class="task-arrow">›</span>
-    </div>`;
-  }
-
   const s      = state[t.id] || {};
   const isDone = s.status === 'done';
   const info   = dueInfo(t.dueDate);
@@ -323,61 +282,6 @@ function renderTaskRow(t) {
   </div>`;
 }
 
-// ============================================================
-// RENDER: Proposal (locked / unlocked)
-// ============================================================
-function renderProposal() {
-  const wrap = document.getElementById('proposal-wrap');
-  if (!wrap) return;
-
-  if (!proposalUnlocked) {
-    wrap.innerHTML = `
-      <div class="proposal-locked" id="proposal-locked" role="button" tabindex="0">
-        <div class="proposal-locked-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="10.5" width="16" height="11" rx="1.5"/>
-            <path d="M8 10.5V7a4 4 0 018 0v3.5"/>
-          </svg>
-        </div>
-        <div class="proposal-locked-title">Private section</div>
-        <div class="proposal-locked-hint">Tap to unlock</div>
-      </div>`;
-    return;
-  }
-
-  const tasks = proposalTasks().filter(filterPass).sort(sortByDue);
-
-  // Group these too
-  const groups = {};
-  tasks.forEach(t => {
-    const g = urgencyGroup(t);
-    (groups[g] = groups[g] || []).push(t);
-  });
-
-  const groupsHtml = tasks.length === 0
-    ? `<div style="padding:30px 20px;text-align:center;color:var(--ink-muted);font-style:italic;">No proposal tasks match this filter.</div>`
-    : GROUP_ORDER.filter(g => groups[g]).map(g => `
-        <div class="checklist-group">
-          <div class="checklist-group-head">
-            <span class="checklist-group-label">${GROUP_LABELS[g]}</span>
-            <span class="checklist-group-count">${groups[g].length}</span>
-          </div>
-          ${groups[g].map(renderTaskRow).join('')}
-        </div>
-      `).join('');
-
-  wrap.innerHTML = `
-    <section class="proposal-unlocked">
-      <div class="proposal-unlocked-head">
-        <div class="proposal-eyebrow">— A Quiet Mission —</div>
-        <div class="proposal-title">The Big Question</div>
-        <div class="proposal-sub">Somewhere between the lavender and the sea, there's a moment waiting to happen.</div>
-      </div>
-      <div class="checklist" style="background:transparent">
-        ${groupsHtml}
-      </div>
-    </section>`;
-}
 
 // ============================================================
 // RENDER: Itinerary
@@ -504,48 +408,6 @@ function closeDrawer() {
   renderAll();
 }
 
-// ============================================================
-// PIN MODAL
-// ============================================================
-function showPinModal(catId) {
-  pendingUnlockCatId = catId || 'proposal';
-  pinBuffer = '';
-  updatePinDots();
-  document.getElementById('pin-error').classList.add('hidden');
-  document.getElementById('pin-overlay').classList.remove('hidden');
-}
-function hidePinModal() {
-  document.getElementById('pin-overlay').classList.add('hidden');
-  pendingUnlockCatId = null;
-  pinBuffer = '';
-}
-function updatePinDots() {
-  for (let i = 0; i < 4; i++) {
-    const dot = document.getElementById(`d${i}`);
-    if (dot) dot.classList.toggle('filled', i < pinBuffer.length);
-  }
-}
-function handlePinKey(k) {
-  if (k === 'cancel') { hidePinModal(); return; }
-  if (k === 'del')    { pinBuffer = pinBuffer.slice(0, -1); updatePinDots(); return; }
-  if (pinBuffer.length >= 4) return;
-  pinBuffer += k;
-  updatePinDots();
-  if (pinBuffer.length === 4) {
-    setTimeout(() => {
-      if (pinBuffer === PIN_SECRET) {
-        proposalUnlocked = true;
-        sessionStorage.setItem('f26_unlocked', '1');
-        hidePinModal();
-        renderAll();
-      } else {
-        document.getElementById('pin-error').classList.remove('hidden');
-        pinBuffer = '';
-        updatePinDots();
-      }
-    }, 150);
-  }
-}
 
 // ============================================================
 // LAYOUT / THEME (fixed settings — no tweaks panel)
@@ -584,9 +446,6 @@ function setupEvents() {
     if (check) {
       e.stopPropagation();
       const taskId = check.dataset.check;
-      const catId  = check.dataset.cat;
-      const cat = CATEGORIES.find(c => c.id === catId);
-      if (cat?.locked && !proposalUnlocked) { showPinModal(catId); return; }
       const cur = state[taskId]?.status;
       state[taskId] = { ...state[taskId], status: cur === 'done' ? 'not-started' : 'done' };
       saveState();
@@ -594,26 +453,10 @@ function setupEvents() {
       return;
     }
 
-    // Locked proposal row
-    if (e.target.closest('[data-locked-proposal]')) {
-      showPinModal('proposal');
-      return;
-    }
-
     // Task row
     const row = e.target.closest('[data-task]');
     if (row) {
-      const taskId = row.dataset.task;
-      const catId  = row.dataset.cat;
-      const cat = CATEGORIES.find(c => c.id === catId);
-      if (cat?.locked && !proposalUnlocked) { showPinModal(catId); return; }
-      openDrawer(taskId);
-      return;
-    }
-
-    // Proposal locked click
-    if (e.target.closest('#proposal-locked')) {
-      showPinModal('proposal');
+      openDrawer(row.dataset.task);
       return;
     }
 
@@ -648,11 +491,6 @@ function setupEvents() {
     // Drawer close
     if (e.target.id === 'drawer-close-btn') { closeDrawer(); return; }
     if (e.target.id === 'drawer-overlay')   { closeDrawer(); return; }
-
-    // PIN keys
-    const key = e.target.closest('[data-k]');
-    if (key) { handlePinKey(key.dataset.k); return; }
-    if (e.target.id === 'pin-overlay') { hidePinModal(); return; }
 
     // Housing: show URL input
     const addBtn = e.target.closest('[data-housing-add]');
@@ -757,16 +595,9 @@ function setupEvents() {
   });
 
   document.addEventListener('keydown', e => {
-    // Housing URL input: submit on Enter
     if (e.key === 'Enter' && e.target.classList.contains('housing-url-input')) {
       submitHousingUrl(e.target.dataset.stop);
-      return;
     }
-    // PIN keyboard
-    if (document.getElementById('pin-overlay').classList.contains('hidden')) return;
-    if (e.key >= '0' && e.key <= '9') handlePinKey(e.key);
-    else if (e.key === 'Backspace')   handlePinKey('del');
-    else if (e.key === 'Escape')      handlePinKey('cancel');
   });
 }
 
@@ -1053,7 +884,6 @@ function renderAll() {
   renderNextUp();
   renderBudget();
   renderChecklist();
-  renderProposal();
   renderItinerary();
   renderHousing();
   renderRestaurants();

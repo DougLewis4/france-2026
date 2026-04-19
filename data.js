@@ -26,19 +26,6 @@ const CATEGORIES = [
     ]
   },
   {
-    id: 'proposal',
-    label: 'Pre-Trip Arrangements',
-    locked: true,
-    tasks: [
-      { id: 'prop-dad', title: 'Talk to her dad', dueDate: '2026-05-01', estimatedCost: 0, defaultStatus: 'not-started', hint: 'Do this before buying the ring so the timeline feels intentional.' },
-      { id: 'prop-ring', title: 'Buy the ring', dueDate: '2026-05-15', estimatedCost: 0, defaultStatus: 'not-started', hint: 'Allow 4–8 weeks for custom work or resizing. Order by mid-May at the absolute latest.' },
-      { id: 'prop-location', title: 'Choose the proposal location', dueDate: '2026-05-15', estimatedCost: 0, defaultStatus: 'not-started', hint: 'Top options:\n• Valensole lavender fields at sunset (Jul 24) — peak July bloom, most iconic\n• Porquerolles — Plage Notre-Dame (Jul 22) — secluded tropical beach\n• Les Baux de Provence (Jul 28) — medieval clifftop, sweeping valley views\n• Paris (Jul 29–31) — classic, always works' },
-      { id: 'prop-photographer', title: 'Book surprise proposal photographer', dueDate: '2026-05-31', estimatedCost: 500, defaultStatus: 'not-started', hint: 'Search: "proposal photographer [location] Provence France"\nPhotographers hide nearby and capture the moment. Book 6–8 weeks before the trip.' },
-      { id: 'prop-plan', title: 'Plan the exact moment', dueDate: '2026-06-30', estimatedCost: 0, defaultStatus: 'not-started', hint: "Think through: what you'll say, how you get her to the spot without it seeming planned, and what happens right after." },
-      { id: 'prop-dinner', title: 'Book celebratory dinner for proposal evening', dueDate: '2026-06-30', estimatedCost: 300, defaultStatus: 'not-started', hint: 'Book a special restaurant near the proposal location for the celebration dinner right after.' }
-    ]
-  },
-  {
     id: 'transport',
     label: 'Transportation',
     locked: false,

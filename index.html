@@ -117,8 +117,6 @@
 
           <div id="checklist-wrap"></div>
 
-          <!-- Proposal locked / unlocked panel -->
-          <div id="proposal-wrap"></div>
         </div>
 
         <!-- Itinerary pane -->
@@ -170,41 +168,6 @@
       </section>
     </div>
   </main>
-
-  <!-- ── PIN ─────────────────────────── -->
-  <div id="pin-overlay" class="pin-overlay hidden">
-    <div class="pin-card">
-      <div class="pin-icon">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="4" y="10.5" width="16" height="11" rx="1.5"/>
-          <path d="M8 10.5V7a4 4 0 018 0v3.5"/>
-        </svg>
-      </div>
-      <div class="pin-title">Private section</div>
-      <div class="pin-hint">Enter your PIN to continue</div>
-      <div class="pin-dots">
-        <div class="pin-dot" id="d0"></div>
-        <div class="pin-dot" id="d1"></div>
-        <div class="pin-dot" id="d2"></div>
-        <div class="pin-dot" id="d3"></div>
-      </div>
-      <div class="pin-error hidden" id="pin-error">Incorrect PIN — try again</div>
-      <div class="pin-keypad">
-        <button class="pin-key" data-k="1">1</button>
-        <button class="pin-key" data-k="2">2</button>
-        <button class="pin-key" data-k="3">3</button>
-        <button class="pin-key" data-k="4">4</button>
-        <button class="pin-key" data-k="5">5</button>
-        <button class="pin-key" data-k="6">6</button>
-        <button class="pin-key" data-k="7">7</button>
-        <button class="pin-key" data-k="8">8</button>
-        <button class="pin-key" data-k="9">9</button>
-        <button class="pin-key cancel" data-k="cancel">✕</button>
-        <button class="pin-key" data-k="0">0</button>
-        <button class="pin-key del" data-k="del">⌫</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ── Drawer ─────────────────────────── -->
   <div id="drawer-overlay" class="drawer-overlay hidden">
