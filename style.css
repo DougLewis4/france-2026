@@ -592,14 +592,22 @@ body {
   transition: all 0.15s;
   white-space: nowrap;
 }
-@media (max-width: 540px) {
-  .pane-switch { width: 100%; justify-content: stretch; gap: 2px; padding: 4px; }
+@media (max-width: 600px) {
+  .pane-switch {
+    display: flex !important;
+    width: 100%;
+    gap: 2px;
+    padding: 4px;
+  }
   .pane-switch button {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     padding: 7px 2px;
-    font-size: 0.55rem;
+    font-size: 0.56rem;
     letter-spacing: 0;
     text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 .pane-switch button.active {
