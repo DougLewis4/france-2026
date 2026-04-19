@@ -649,8 +649,6 @@ function setupEvents() {
     if (key) { handlePinKey(key.dataset.k); return; }
     if (e.target.id === 'pin-overlay') { hidePinModal(); return; }
 
-  });
-
     // Housing: show URL input
     const addBtn = e.target.closest('[data-housing-add]');
     if (addBtn) {
