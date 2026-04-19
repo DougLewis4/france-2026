@@ -609,6 +609,10 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .section-head { flex-direction: column; gap: 4px; }
+  .section-title { font-size: 1.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .section-eyebrow { display: none; }
+  .section-sub { font-size: 0.72rem; }
 }
 .pane-switch button.active {
   background: var(--ink);
