@@ -186,6 +186,19 @@ const ITINERARY = [
 ];
 
 // ============================================================
+// RESTAURANT STOPS  (skip Jul 17, 18, Aug 1 — travel days)
+// ============================================================
+const RESTAURANT_STOPS = [
+  { id: 'sanary',  label: 'Sanary & The Coast',          dates: ['2026-07-19','2026-07-20','2026-07-21','2026-07-22'] },
+  { id: 'aix',     label: 'Aix-en-Provence & Valensole', dates: ['2026-07-23','2026-07-24'] },
+  { id: 'verdon',  label: 'Gorges du Verdon',            dates: ['2026-07-25'] },
+  { id: 'avignon', label: 'Avignon & Surrounds',         dates: ['2026-07-26','2026-07-27','2026-07-28'] },
+  { id: 'paris',   label: 'Paris',                       dates: ['2026-07-29','2026-07-30','2026-07-31'] },
+];
+
+const MEAL_SKIP_DAYS = new Set(['2026-07-17','2026-07-18','2026-08-01']);
+
+// ============================================================
 // HOUSING STOPS
 // ============================================================
 const HOUSING_STOPS = [

@@ -12,9 +12,10 @@ const STORAGE_KEY = 'france2026_v2';
 const PIN_SECRET  = '1261';
 const DEPARTURE   = new Date('2026-07-17T15:00:00');
 
-let state        = {};
-let itinExpanded = {};
-let housingData  = {};
+let state          = {};
+let itinExpanded   = {};
+let housingData    = {};
+let restaurantData = [];
 let proposalUnlocked = sessionStorage.getItem('f26_unlocked') === '1';
 let pendingUnlockCatId = null;
 let pinBuffer    = '';
@@ -33,7 +34,8 @@ function loadState() {
       const saved  = JSON.parse(raw);
       state        = saved.state        || {};
       itinExpanded = saved.itinExpanded || {};
-      housingData  = saved.housingData  || {};
+      housingData    = saved.housingData    || {};
+      restaurantData = saved.restaurantData || [];
     }
   } catch (e) {}
 
@@ -54,7 +56,7 @@ function loadState() {
   });
 }
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, itinExpanded, housingData }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, itinExpanded, housingData, restaurantData }));
 }
 
 // ============================================================
@@ -418,6 +420,7 @@ function renderItinerary() {
             `).join('')}
           </div>
         </div>
+        ${renderDayMeals(day.date)}
       </div>
     </article>`;
   }).join('');
@@ -558,9 +561,11 @@ function applyTweaks() {
   const chk = document.querySelector('.pane-checklist');
   const itn = document.querySelector('.pane-itinerary');
   const hou = document.querySelector('.pane-housing');
+  const rst = document.querySelector('.pane-restaurants');
   if (chk) chk.classList.toggle('is-hidden', currentPane !== 'checklist');
   if (itn) itn.classList.toggle('is-hidden', currentPane !== 'itinerary');
   if (hou) hou.classList.toggle('is-hidden', currentPane !== 'housing');
+  if (rst) rst.classList.toggle('is-hidden', currentPane !== 'restaurants');
 
   document.querySelectorAll('.pane-switch button').forEach(b => {
     b.classList.toggle('active', b.dataset.pane === currentPane);
@@ -681,12 +686,74 @@ function setupEvents() {
     const delBtn = e.target.closest('[data-housing-delete]');
     if (delBtn) { deleteHousingOption(delBtn.dataset.housingDelete, delBtn.dataset.option); return; }
 
+    // Restaurant: show add form
+    const restAddBtn = e.target.closest('[data-restaurant-add]');
+    if (restAddBtn) {
+      const sid = restAddBtn.dataset.restaurantAdd;
+      document.getElementById(`rest-form-wrap-${sid}`).style.display = '';
+      restAddBtn.style.display = 'none';
+      return;
+    }
+
+    // Restaurant: cancel form
+    const restCancel = e.target.closest('[data-rf-cancel]');
+    if (restCancel) {
+      const sid = restCancel.dataset.rfCancel;
+      document.getElementById(`rest-form-wrap-${sid}`).style.display = 'none';
+      document.getElementById(`rest-add-btn-${sid}`).style.display = '';
+      return;
+    }
+
+    // Restaurant: save form
+    const restSave = e.target.closest('[data-rf-save]');
+    if (restSave) {
+      const sid = restSave.dataset.rfSave;
+      const form = document.querySelector(`.restaurant-form[data-stop="${sid}"]`);
+      if (!form) return;
+      const url   = form.querySelector('[data-rf-url]').value.trim();
+      const name  = form.querySelector('[data-rf-name]').value.trim();
+      const meal  = form.querySelector('[data-rf-meal]').value;
+      const date  = form.querySelector('[data-rf-date]').value;
+      const notes = form.querySelector('[data-rf-notes]').value.trim();
+      if (!name && !url) {
+        form.querySelector('[data-rf-name]').focus();
+        return;
+      }
+      restaurantData.push({ id: 'r_' + Date.now(), stopId: sid, url, name: name || 'View on Maps', meal, date, notes });
+      saveState();
+      renderRestaurants();
+      renderItinerary();
+      return;
+    }
+
+    // Restaurant: delete card
+    const restDel = e.target.closest('[data-restaurant-delete]');
+    if (restDel) {
+      restaurantData = restaurantData.filter(r => r.id !== restDel.dataset.restaurantDelete);
+      saveState();
+      renderRestaurants();
+      renderItinerary();
+      return;
+    }
+
   });
 
   // Housing: auto-save fields on blur; Enter submits URL input
   document.addEventListener('focusout', e => {
     const field = e.target.closest('[data-housing-field]');
     if (field) updateHousingOption(field.dataset.stop, field.dataset.option, field.dataset.housingField, field.value);
+  });
+
+  document.addEventListener('input', e => {
+    const urlInput = e.target.closest('[data-rf-url]');
+    if (urlInput) {
+      const parsed = parseGoogleMapsUrl(urlInput.value.trim());
+      if (parsed.valid && parsed.name) {
+        const form = urlInput.closest('.restaurant-form');
+        const nameInput = form && form.querySelector('[data-rf-name]');
+        if (nameInput && !nameInput.value) nameInput.value = parsed.name;
+      }
+    }
   });
 
   document.addEventListener('keydown', e => {
@@ -844,6 +911,141 @@ function renderHousing() {
 }
 
 // ============================================================
+// RESTAURANTS
+// ============================================================
+function parseGoogleMapsUrl(url) {
+  try {
+    const m = url.match(/\/maps\/place\/([^/@?]+)/);
+    if (m) return { valid: true, name: decodeURIComponent(m[1].replace(/\+/g, ' ')) };
+    if (url.includes('google.com/maps') || url.includes('maps.app.goo.gl') || url.includes('goo.gl'))
+      return { valid: true, name: '' };
+    return { valid: false };
+  } catch(e) { return { valid: false }; }
+}
+
+const MEAL_ORDER = ['breakfast', 'lunch', 'dinner'];
+const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
+
+function renderDayMeals(date) {
+  if (MEAL_SKIP_DAYS.has(date)) return '';
+  const dayRests = restaurantData.filter(r => r.date === date);
+  const rows = MEAL_ORDER.map(meal => {
+    const r = dayRests.find(r => r.meal === meal);
+    if (r) {
+      return `<div class="itin-meal-row">
+        <span class="itin-meal-type meal-${esc(meal)}">${MEAL_LABEL[meal]}</span>
+        <a class="itin-meal-link" href="${esc(r.url || '#')}" target="_blank" rel="noopener">${esc(r.name || 'View on Maps')} ↗</a>
+        ${r.notes ? `<span class="itin-meal-notes">${esc(r.notes)}</span>` : ''}
+      </div>`;
+    }
+    return `<div class="itin-meal-row itin-meal-empty">
+      <span class="itin-meal-type">${MEAL_LABEL[meal]}</span>
+      <span class="itin-meal-blank">—</span>
+    </div>`;
+  }).join('');
+  return `<div class="itin-meals"><div class="itin-meals-head">Dining</div>${rows}</div>`;
+}
+
+function renderRestaurantCard(r) {
+  const p = parseDateParts(r.date);
+  const dayData = ITINERARY.find(d => d.date === r.date);
+  const dateLabel = p ? `${dayData?.dow || ''}, ${p.mon} ${p.day}` : '';
+  return `<div class="rest-card">
+    <div class="rest-card-top">
+      <span class="rest-meal-chip meal-${esc(r.meal)}">${MEAL_LABEL[r.meal]}</span>
+      <a class="rest-card-name" href="${esc(r.url || '#')}" target="_blank" rel="noopener">${esc(r.name || 'View on Maps')} ↗</a>
+      <button class="rest-card-del" data-restaurant-delete="${esc(r.id)}" title="Remove">✕</button>
+    </div>
+    <div class="rest-card-date">${esc(dateLabel)}</div>
+    ${r.notes ? `<div class="rest-card-notes">${esc(r.notes)}</div>` : ''}
+  </div>`;
+}
+
+function renderRestaurantForm(stop) {
+  const dateOpts = stop.dates.map(d => {
+    const dayData = ITINERARY.find(x => x.date === d);
+    const p = parseDateParts(d);
+    const label = dayData ? `${dayData.dow}, ${p.mon} ${p.day} — ${dayData.title}` : `${p.mon} ${p.day}`;
+    return `<option value="${esc(d)}">${esc(label)}</option>`;
+  }).join('');
+  return `<div class="restaurant-form" data-stop="${esc(stop.id)}">
+    <div class="rest-form-row">
+      <label class="rest-form-label">Google Maps URL</label>
+      <input class="rest-form-input" type="url" data-rf-url data-stop="${esc(stop.id)}" placeholder="Paste link…"/>
+    </div>
+    <div class="rest-form-row">
+      <label class="rest-form-label">Name</label>
+      <input class="rest-form-input" type="text" data-rf-name data-stop="${esc(stop.id)}" placeholder="Restaurant name"/>
+    </div>
+    <div class="rest-form-row rest-form-2col">
+      <div>
+        <label class="rest-form-label">Meal</label>
+        <select class="rest-form-select" data-rf-meal data-stop="${esc(stop.id)}">
+          <option value="breakfast">Breakfast</option>
+          <option value="lunch">Lunch</option>
+          <option value="dinner" selected>Dinner</option>
+        </select>
+      </div>
+      <div>
+        <label class="rest-form-label">Date</label>
+        <select class="rest-form-select" data-rf-date data-stop="${esc(stop.id)}">${dateOpts}</select>
+      </div>
+    </div>
+    <div class="rest-form-row">
+      <label class="rest-form-label">Notes</label>
+      <textarea class="rest-form-input rest-form-ta" data-rf-notes data-stop="${esc(stop.id)}" placeholder="Reservation info, must-try dishes…"></textarea>
+    </div>
+    <div class="rest-form-actions">
+      <button class="rest-form-save" data-rf-save="${esc(stop.id)}">Save restaurant</button>
+      <button class="rest-form-cancel" data-rf-cancel="${esc(stop.id)}">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function renderRestaurants() {
+  const wrap = document.getElementById('restaurants-wrap');
+  if (!wrap) return;
+
+  wrap.innerHTML = RESTAURANT_STOPS.map(stop => {
+    const p1 = parseDateParts(stop.dates[0]);
+    const p2 = parseDateParts(stop.dates[stop.dates.length - 1]);
+    const range = stop.dates.length === 1
+      ? `${p1.mon} ${p1.day}`
+      : `${p1.mon} ${p1.day} – ${p2.mon} ${p2.day}`;
+
+    const daysHtml = stop.dates.map(date => {
+      const dayData = ITINERARY.find(d => d.date === date);
+      const p = parseDateParts(date);
+      const entries = restaurantData
+        .filter(r => r.date === date)
+        .sort((a, b) => MEAL_ORDER.indexOf(a.meal) - MEAL_ORDER.indexOf(b.meal));
+      return `<div class="rest-day-group">
+        <div class="rest-day-head">
+          <span class="rest-day-dow">${esc(dayData?.dow || '')}</span>
+          <span class="rest-day-date">${p.mon} ${p.day}</span>
+          <span class="rest-day-title">${esc(dayData?.title || '')}</span>
+        </div>
+        ${entries.length === 0
+          ? `<p class="rest-day-empty">No restaurants added yet</p>`
+          : entries.map(renderRestaurantCard).join('')}
+      </div>`;
+    }).join('');
+
+    return `<div class="rest-stop">
+      <div class="rest-stop-head">
+        <div class="rest-stop-label">${esc(stop.label)}</div>
+        <div class="rest-stop-meta">${esc(range)} · ${stop.dates.length} day${stop.dates.length > 1 ? 's' : ''}</div>
+      </div>
+      <div class="rest-stop-body">${daysHtml}</div>
+      <div class="rest-add-row">
+        <div id="rest-form-wrap-${esc(stop.id)}" style="display:none">${renderRestaurantForm(stop)}</div>
+        <button class="rest-add-btn" id="rest-add-btn-${esc(stop.id)}" data-restaurant-add="${esc(stop.id)}">+ Add restaurant</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
 // RENDER ALL
 // ============================================================
 function renderAll() {
@@ -854,6 +1056,7 @@ function renderAll() {
   renderProposal();
   renderItinerary();
   renderHousing();
+  renderRestaurants();
   applyTweaks();
 }
 
