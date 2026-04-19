@@ -592,13 +592,13 @@ body {
   transition: all 0.15s;
   white-space: nowrap;
 }
-@media (max-width: 500px) {
-  .pane-switch { width: 100%; justify-content: stretch; }
+@media (max-width: 540px) {
+  .pane-switch { width: 100%; justify-content: stretch; gap: 2px; padding: 4px; }
   .pane-switch button {
     flex: 1;
-    padding: 7px 4px;
-    font-size: 0.62rem;
-    letter-spacing: 0.03em;
+    padding: 7px 2px;
+    font-size: 0.55rem;
+    letter-spacing: 0;
     text-align: center;
   }
 }
