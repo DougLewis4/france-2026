@@ -14,6 +14,7 @@ const DEPARTURE   = new Date('2026-07-17T15:00:00');
 
 let state        = {};
 let itinExpanded = {};
+let housingData  = {};
 let proposalUnlocked = sessionStorage.getItem('f26_unlocked') === '1';
 let pendingUnlockCatId = null;
 let pinBuffer    = '';
@@ -31,6 +32,7 @@ function loadState() {
       const saved  = JSON.parse(raw);
       state        = saved.state        || {};
       itinExpanded = saved.itinExpanded || {};
+      housingData  = saved.housingData  || {};
     }
   } catch (e) {}
 
@@ -45,9 +47,13 @@ function loadState() {
       }
     });
   });
+
+  HOUSING_STOPS.forEach(stop => {
+    if (!housingData[stop.id]) housingData[stop.id] = { options: [], selectedId: null };
+  });
 }
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, itinExpanded }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, itinExpanded, housingData }));
 }
 
 // ============================================================
@@ -550,10 +556,10 @@ function applyTweaks() {
 
   const chk = document.querySelector('.pane-checklist');
   const itn = document.querySelector('.pane-itinerary');
-  if (chk && itn) {
-    chk.classList.toggle('is-hidden', currentPane !== 'checklist');
-    itn.classList.toggle('is-hidden', currentPane !== 'itinerary');
-  }
+  const hou = document.querySelector('.pane-housing');
+  if (chk) chk.classList.toggle('is-hidden', currentPane !== 'checklist');
+  if (itn) itn.classList.toggle('is-hidden', currentPane !== 'itinerary');
+  if (hou) hou.classList.toggle('is-hidden', currentPane !== 'housing');
 
   document.querySelectorAll('.pane-switch button').forEach(b => {
     b.classList.toggle('active', b.dataset.pane === currentPane);
@@ -644,13 +650,198 @@ function setupEvents() {
 
   });
 
-  // Keyboard support for PIN
+    // Housing: show URL input
+    const addBtn = e.target.closest('[data-housing-add]');
+    if (addBtn) {
+      const sid = addBtn.dataset.housingAdd;
+      document.getElementById(`url-wrap-${sid}`).style.display = 'flex';
+      addBtn.style.display = 'none';
+      document.getElementById(`url-input-${sid}`).focus();
+      return;
+    }
+
+    // Housing: cancel URL input
+    const cancelBtn = e.target.closest('[data-housing-cancel]');
+    if (cancelBtn) {
+      const sid = cancelBtn.dataset.housingCancel;
+      document.getElementById(`url-wrap-${sid}`).style.display = 'none';
+      document.getElementById(`add-btn-${sid}`).style.display  = '';
+      document.getElementById(`url-input-${sid}`).value = '';
+      return;
+    }
+
+    // Housing: submit URL
+    const submitBtn = e.target.closest('[data-housing-submit]');
+    if (submitBtn) { submitHousingUrl(submitBtn.dataset.housingSubmit); return; }
+
+    // Housing: select option
+    const selBtn = e.target.closest('[data-housing-select]');
+    if (selBtn) { selectHousingOption(selBtn.dataset.housingSelect, selBtn.dataset.option); return; }
+
+    // Housing: delete option
+    const delBtn = e.target.closest('[data-housing-delete]');
+    if (delBtn) { deleteHousingOption(delBtn.dataset.housingDelete, delBtn.dataset.option); return; }
+
+  });
+
+  // Housing: auto-save fields on blur; Enter submits URL input
+  document.addEventListener('focusout', e => {
+    const field = e.target.closest('[data-housing-field]');
+    if (field) updateHousingOption(field.dataset.stop, field.dataset.option, field.dataset.housingField, field.value);
+  });
+
   document.addEventListener('keydown', e => {
+    // Housing URL input: submit on Enter
+    if (e.key === 'Enter' && e.target.classList.contains('housing-url-input')) {
+      submitHousingUrl(e.target.dataset.stop);
+      return;
+    }
+    // PIN keyboard
     if (document.getElementById('pin-overlay').classList.contains('hidden')) return;
     if (e.key >= '0' && e.key <= '9') handlePinKey(e.key);
     else if (e.key === 'Backspace')   handlePinKey('del');
     else if (e.key === 'Escape')      handlePinKey('cancel');
   });
+}
+
+// ============================================================
+// HOUSING
+// ============================================================
+function parseListingUrl(url) {
+  try {
+    const u = new URL(url);
+    const airbnb = url.match(/airbnb\.[a-z.]+\/rooms\/(\d+)/);
+    if (airbnb) return { valid: true, site: 'Airbnb', listingId: airbnb[1] };
+    if (u.hostname) return { valid: true, site: u.hostname.replace('www.', ''), listingId: null };
+    return { valid: false };
+  } catch (e) { return { valid: false }; }
+}
+
+function addHousingOption(stopId, url) {
+  const parsed = parseListingUrl(url.trim());
+  if (!parsed.valid) return false;
+  housingData[stopId].options.push({
+    id: 'h_' + Date.now(),
+    url: url.trim(),
+    site: parsed.site,
+    listingId: parsed.listingId,
+    name: '', price: '', notes: ''
+  });
+  saveState();
+  return true;
+}
+
+function submitHousingUrl(stopId) {
+  const input = document.getElementById(`url-input-${stopId}`);
+  if (!input) return;
+  const ok = addHousingOption(stopId, input.value);
+  if (ok) {
+    document.getElementById(`url-wrap-${stopId}`).style.display = 'none';
+    document.getElementById(`add-btn-${stopId}`).style.display  = '';
+    input.value = '';
+    renderHousing();
+  } else {
+    input.style.outline = '2px solid var(--urg-over)';
+    input.placeholder   = 'Please paste a valid URL';
+    setTimeout(() => { input.style.outline = ''; input.placeholder = 'Paste Airbnb URL…'; }, 2000);
+  }
+}
+
+function selectHousingOption(stopId, optionId) {
+  const h = housingData[stopId];
+  const hs = HOUSING_STOPS.find(s => s.id === stopId);
+  if (h.selectedId === optionId) {
+    h.selectedId = null;
+    if (hs && state[hs.taskId]) state[hs.taskId] = { ...state[hs.taskId], status: 'not-started' };
+  } else {
+    h.selectedId = optionId;
+    if (hs && state[hs.taskId]) state[hs.taskId] = { ...state[hs.taskId], status: 'booked' };
+  }
+  saveState();
+  renderAll();
+}
+
+function deleteHousingOption(stopId, optionId) {
+  const h = housingData[stopId];
+  if (h.selectedId === optionId) {
+    h.selectedId = null;
+    const hs = HOUSING_STOPS.find(s => s.id === stopId);
+    if (hs && state[hs.taskId]) state[hs.taskId] = { ...state[hs.taskId], status: 'not-started' };
+  }
+  h.options = h.options.filter(o => o.id !== optionId);
+  saveState();
+  renderAll();
+}
+
+function updateHousingOption(stopId, optionId, field, value) {
+  const opt = housingData[stopId]?.options.find(o => o.id === optionId);
+  if (opt) { opt[field] = value; saveState(); }
+}
+
+function renderHousingOption(stopId, opt, selectedId) {
+  const isSel = opt.id === selectedId;
+  const display = opt.listingId ? `${esc(opt.site)} #${esc(opt.listingId)}` : esc(opt.site);
+  return `<div class="housing-option ${isSel ? 'is-selected' : ''}">
+    <div class="housing-opt-top">
+      <a class="housing-opt-link" href="${esc(opt.url)}" target="_blank" rel="noopener">${display} ↗</a>
+      <button class="housing-opt-del" data-housing-delete="${esc(stopId)}" data-option="${esc(opt.id)}" title="Remove">✕</button>
+    </div>
+    <div class="housing-opt-fields">
+      <input class="housing-field" placeholder="Nickname (e.g. Sunny terrace apt)"
+        value="${esc(opt.name)}"
+        data-housing-field="name" data-stop="${esc(stopId)}" data-option="${esc(opt.id)}"/>
+      <div class="housing-price-row">
+        <span class="housing-price-pre">$</span>
+        <input class="housing-field housing-field-price" type="number" placeholder="0"
+          value="${esc(opt.price)}"
+          data-housing-field="price" data-stop="${esc(stopId)}" data-option="${esc(opt.id)}"/>
+        <span class="housing-price-suf">/ night</span>
+      </div>
+      <textarea class="housing-field housing-field-notes" placeholder="Notes — beds, location, vibe…"
+        data-housing-field="notes" data-stop="${esc(stopId)}" data-option="${esc(opt.id)}">${esc(opt.notes)}</textarea>
+    </div>
+    <button class="housing-select-btn ${isSel ? 'selected' : ''}"
+      data-housing-select="${esc(stopId)}" data-option="${esc(opt.id)}">
+      ${isSel ? 'Booked ✓' : 'Select this one'}
+    </button>
+  </div>`;
+}
+
+function renderHousing() {
+  const wrap = document.getElementById('housing-wrap');
+  if (!wrap) return;
+
+  wrap.innerHTML = HOUSING_STOPS.map(stop => {
+    const h = housingData[stop.id] || { options: [], selectedId: null };
+    const p1 = parseDateParts(stop.checkIn);
+    const p2 = parseDateParts(stop.checkOut);
+    const range = p1 && p2 ? `${p1.mon} ${p1.day} – ${p2.mon} ${p2.day}` : '';
+    const isBooked = !!h.selectedId;
+
+    const optionsHtml = h.options.length === 0
+      ? `<p class="housing-empty">No options yet — paste a link to compare.</p>`
+      : `<div class="housing-options">${h.options.map(o => renderHousingOption(stop.id, o, h.selectedId)).join('')}</div>`;
+
+    return `<div class="housing-stop ${isBooked ? 'is-booked' : ''}">
+      <div class="housing-stop-head">
+        <div>
+          <div class="housing-stop-label">${esc(stop.label)}</div>
+          <div class="housing-stop-meta">${esc(range)} · ${stop.nights} night${stop.nights > 1 ? 's' : ''}</div>
+        </div>
+        ${isBooked ? `<span class="housing-booked-pill">Booked ✓</span>` : ''}
+      </div>
+      ${optionsHtml}
+      <div class="housing-add-row">
+        <div class="housing-url-row" id="url-wrap-${esc(stop.id)}" style="display:none">
+          <input class="housing-url-input" id="url-input-${esc(stop.id)}"
+            placeholder="Paste Airbnb URL…" type="url" data-stop="${esc(stop.id)}"/>
+          <button class="housing-url-add" data-housing-submit="${esc(stop.id)}">Add</button>
+          <button class="housing-url-cancel" data-housing-cancel="${esc(stop.id)}">✕</button>
+        </div>
+        <button class="housing-add-btn" id="add-btn-${esc(stop.id)}" data-housing-add="${esc(stop.id)}">+ Add option</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -663,6 +854,7 @@ function renderAll() {
   renderChecklist();
   renderProposal();
   renderItinerary();
+  renderHousing();
   applyTweaks();
 }
 

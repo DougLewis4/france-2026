@@ -184,3 +184,15 @@ const ITINERARY = [
     { time: '2:55 PM',  detail: 'Land San Diego — home with stories for a lifetime' }
   ]}
 ];
+
+// ============================================================
+// HOUSING STOPS
+// ============================================================
+const HOUSING_STOPS = [
+  { id: 'sanary',  label: 'Sanary-sur-Mer',     checkIn: '2026-07-18', checkOut: '2026-07-22', nights: 4, taskId: 'hotel-sanary'  },
+  { id: 'aix',     label: 'Aix-en-Provence',    checkIn: '2026-07-23', checkOut: '2026-07-24', nights: 1, taskId: 'hotel-aix'     },
+  { id: 'verdon',  label: 'Verdon / Moustiers', checkIn: '2026-07-24', checkOut: '2026-07-26', nights: 2, taskId: 'hotel-verdon'  },
+  { id: 'avignon', label: 'Avignon',             checkIn: '2026-07-26', checkOut: '2026-07-29', nights: 3, taskId: 'hotel-avignon' },
+  { id: 'paris',   label: 'Paris',               checkIn: '2026-07-29', checkOut: '2026-07-31', nights: 2, taskId: 'hotel-paris'  },
+  { id: 'cdg',     label: 'CDG Airport Hotel',   checkIn: '2026-07-31', checkOut: '2026-08-01', nights: 1, taskId: 'hotel-cdg'   },
+];
