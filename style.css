@@ -275,7 +275,8 @@ body {
 
 /* Tabbed layout: same grid, but content pane shows one section at a time (JS toggles) */
 :root[data-layout="tabbed"] .pane-checklist.is-hidden,
-:root[data-layout="tabbed"] .pane-itinerary.is-hidden {
+:root[data-layout="tabbed"] .pane-itinerary.is-hidden,
+:root[data-layout="tabbed"] .pane-housing.is-hidden {
   display: none;
 }
 
