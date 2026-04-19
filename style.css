@@ -573,6 +573,7 @@ body {
   border: 1px solid var(--rule);
   border-radius: 999px;
   width: fit-content;
+  max-width: 100%;
   margin-bottom: 4px;
 }
 :root[data-layout="tabbed"] .pane-switch { display: inline-flex; }
@@ -589,6 +590,17 @@ body {
   text-transform: uppercase;
   font-weight: 600;
   transition: all 0.15s;
+  white-space: nowrap;
+}
+@media (max-width: 500px) {
+  .pane-switch { width: 100%; justify-content: stretch; }
+  .pane-switch button {
+    flex: 1;
+    padding: 7px 4px;
+    font-size: 0.62rem;
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
 }
 .pane-switch button.active {
   background: var(--ink);
