@@ -27,7 +27,8 @@ let currentPane   = 'checklist'; // for tabbed layout
 // ============================================================
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY)
+             || localStorage.getItem('france2026_v1'); // migrate from original key
     if (raw) {
       const saved  = JSON.parse(raw);
       state        = saved.state        || {};
