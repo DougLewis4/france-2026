@@ -42,7 +42,7 @@ const CATEGORIES = [
     locked: false,
     tasks: [
       { id: 'hotel-sanary', title: 'Sanary-sur-Mer — 4 nights (Jul 18–22)', dueDate: '2026-05-15', estimatedCost: 800, defaultStatus: 'not-started', hint: 'Near the wedding venue (Toulon area). Check with Loup about group Airbnb options.\nHotels: Ibis Budget Toulon, OKKO Hotels, Grand Hotel Dauphine, Best Western Plus La Corniche. Group options: $59–$125/person/night.' },
-      { id: 'hotel-aix', title: 'Aix-en-Provence — 1 night (Jul 23)', dueDate: '2026-06-01', estimatedCost: 200, defaultStatus: 'not-started', hint: 'Stay near Cours Mirabeau or in the Mazarin district for the best experience.' },
+      { id: 'hotel-aix', title: 'Aix-en-Provence — 2 nights (Jul 22–24)', dueDate: '2026-06-01', estimatedCost: 400, defaultStatus: 'not-started', hint: 'Stay near Cours Mirabeau or in the Mazarin district for the best experience.' },
       { id: 'hotel-verdon', title: 'Verdon Gorge area — 2 nights (Jul 24–25)', dueDate: '2026-06-01', estimatedCost: 400, defaultStatus: 'not-started', hint: 'Stay in Moustiers-Sainte-Marie — a beautiful perched village right at the gorge entrance. Fills up fast in July.' },
       { id: 'hotel-avignon', title: 'Avignon — 3 nights (Jul 26–28)', dueDate: '2026-06-01', estimatedCost: 600, defaultStatus: 'not-started', hint: 'Stay inside the medieval walled city for best atmosphere.\nAvignon Theater Festival runs all July — hotels book out early!' },
       { id: 'hotel-paris', title: 'Paris — 2 nights (Jul 29–30)', dueDate: '2026-06-01', estimatedCost: 500, defaultStatus: 'not-started', hint: 'Central arrondissements (1st, 6th, 7th, 8th) for walkability to major sights.' },
@@ -105,17 +105,19 @@ const ITINERARY = [
     { time: 'Afternoon', detail: 'Cassis or Calanques for more swimming and exploring' },
     { time: 'Evening',   detail: 'Dinner at Sanary harbor' }
   ]},
-  { date: '2026-07-22', dow: 'Wednesday', title: 'Porquerolles Island Day Trip', stop: 'Porquerolles', photo: 'images/porquerolles.jpg', activities: [
-    { time: 'Morning',   detail: 'Drive to La Tour Fondue port near Hyères' },
+  { date: '2026-07-22', dow: 'Wednesday', title: 'Porquerolles + Bandol + Aix', stop: 'Porquerolles', photo: 'images/porquerolles.jpg', activities: [
+    { time: 'Morning',    detail: 'Drive to La Tour Fondue port near Hyères' },
     { time: '~9:30 AM',  detail: 'Take 20-min ferry to Porquerolles (car-free island)' },
-    { time: 'All day',   detail: 'Rent bikes, swim at Plage Notre-Dame (tropical white sand + turquoise water)' },
-    { time: 'Afternoon', detail: 'Ferry back, drive toward Aix-en-Provence' }
+    { time: 'All day',    detail: 'Rent bikes, swim at Plage Notre-Dame (tropical white sand + turquoise water)' },
+    { time: 'Late aftern.', detail: 'Ferry back — brief stop at Le Castellet, the medieval hilltop village above the Bandol vineyards' },
+    { time: '~4:30 PM',  detail: 'Bandol wine tasting — the rosé capital of Provence, vineyards on the sea' },
+    { time: 'Evening',    detail: 'Drive to Aix-en-Provence (~45 min), check in, evening stroll on Cours Mirabeau' }
   ]},
-  { date: '2026-07-23', dow: 'Thursday',  title: 'Le Castellet + Bandol + Aix', stop: 'Aix-en-Provence', photo: 'images/aix-en-provence.jpg', activities: [
-    { time: 'Morning',    detail: 'Le Castellet — perfectly preserved medieval hilltop village with valley views' },
-    { time: 'Late morn.', detail: 'Bandol wine tasting — the rosé capital of Provence, vineyards on the sea' },
-    { time: 'Afternoon',  detail: 'Drive to Aix-en-Provence (45 min)' },
-    { time: 'Evening',    detail: "Stroll Cours Mirabeau — Provence's grand boulevard lined with fountains and cafés" }
+  { date: '2026-07-23', dow: 'Thursday',  title: 'Aix-en-Provence', stop: 'Aix-en-Provence', photo: 'images/aix-en-provence.jpg', activities: [
+    { time: 'Morning',    detail: "Aix morning market — one of the best in Provence, held on Cours Mirabeau and Place Richelme" },
+    { time: 'Mid-morn.',  detail: "Mazarin district — 17th-century aristocratic quarter, elegant mansions, quiet fountained squares" },
+    { time: 'Afternoon',  detail: "Cézanne's studio (Atelier Cézanne) — the painter lived here and was inspired by Mont Sainte-Victoire, visible from the city" },
+    { time: 'Evening',    detail: "Long dinner on Cours Mirabeau — Provence's grand boulevard lined with plane trees, fountains, and cafés" }
   ]},
   { date: '2026-07-24', dow: 'Friday',    title: 'Aix + Valensole Lavender',  stop: 'Valensole',   photo: 'images/valensole.jpg', activities: [
     { time: 'Morning',    detail: "Explore Aix-en-Provence — Mazarin district, Cézanne's studio, morning market" },
@@ -128,7 +130,7 @@ const ITINERARY = [
     { time: 'Afternoon', detail: 'Kayak or electric boat on Lac de Sainte-Croix at the gorge base' },
     { time: 'Option',    detail: 'Hike the Sentier Martel trail along the canyon floor' }
   ]},
-  { date: '2026-07-26', dow: 'Sunday',    title: 'Luberon + Roussillon',      stop: 'Avignon',     photo: 'images/avignon.webp', activities: [
+  { date: '2026-07-26', dow: 'Sunday',    title: 'Luberon + Roussillon',      stop: 'Avignon',     photo: 'images/luberon.jpg', activities: [
     { time: 'Morning',   detail: 'Drive through the Luberon — lavender and vineyard countryside' },
     { time: 'Mid-morn.', detail: 'Roussillon — village built from red and orange ochre rock, hike the Ochre Trail' },
     { time: 'Afternoon', detail: 'Continue through Luberon villages, drive to Avignon' },
@@ -140,7 +142,7 @@ const ITINERARY = [
     { time: 'Afternoon', detail: 'Explore the medieval walled city — ramparts, markets, hidden squares' },
     { time: 'Evening',   detail: 'Avignon Theater Festival runs all July — check for a show' }
   ]},
-  { date: '2026-07-28', dow: 'Tuesday',   title: 'Arles + Les Baux',           stop: 'Avignon',     photo: 'images/avignon.webp', activities: [
+  { date: '2026-07-28', dow: 'Tuesday',   title: 'Arles + Les Baux',           stop: 'Avignon',     photo: 'images/les-baux.jpg', activities: [
     { time: 'Morning',   detail: 'Arles (30 min south) — UNESCO Roman city, 2,000-year-old amphitheater still in use' },
     { time: 'Mid-morn.', detail: "Van Gogh's Yellow House site, Roman Theater ruins" },
     { time: 'Afternoon', detail: 'Les Baux-de-Provence — medieval fortress on a rocky cliff, sweeping valley views' },
@@ -177,7 +179,7 @@ const ITINERARY = [
 // ============================================================
 const RESTAURANT_STOPS = [
   { id: 'sanary',  label: 'Sanary & The Coast',          dates: ['2026-07-19','2026-07-20','2026-07-21','2026-07-22'] },
-  { id: 'aix',     label: 'Aix-en-Provence & Valensole', dates: ['2026-07-23','2026-07-24'] },
+  { id: 'aix',     label: 'Aix-en-Provence & Valensole', dates: ['2026-07-22','2026-07-23','2026-07-24'] },
   { id: 'verdon',  label: 'Gorges du Verdon',            dates: ['2026-07-25'] },
   { id: 'avignon', label: 'Avignon & Surrounds',         dates: ['2026-07-26','2026-07-27','2026-07-28'] },
   { id: 'paris',   label: 'Paris',                       dates: ['2026-07-29','2026-07-30','2026-07-31'] },
@@ -190,7 +192,7 @@ const MEAL_SKIP_DAYS = new Set(['2026-07-17','2026-07-18','2026-08-01']);
 // ============================================================
 const HOUSING_STOPS = [
   { id: 'sanary',  label: 'Sanary-sur-Mer',     checkIn: '2026-07-18', checkOut: '2026-07-22', nights: 4, taskId: 'hotel-sanary'  },
-  { id: 'aix',     label: 'Aix-en-Provence',    checkIn: '2026-07-23', checkOut: '2026-07-24', nights: 1, taskId: 'hotel-aix'     },
+  { id: 'aix',     label: 'Aix-en-Provence',    checkIn: '2026-07-22', checkOut: '2026-07-24', nights: 2, taskId: 'hotel-aix'     },
   { id: 'verdon',  label: 'Verdon / Moustiers', checkIn: '2026-07-24', checkOut: '2026-07-26', nights: 2, taskId: 'hotel-verdon'  },
   { id: 'avignon', label: 'Avignon',             checkIn: '2026-07-26', checkOut: '2026-07-29', nights: 3, taskId: 'hotel-avignon' },
   { id: 'paris',   label: 'Paris',               checkIn: '2026-07-29', checkOut: '2026-07-31', nights: 2, taskId: 'hotel-paris'  },
