@@ -716,8 +716,25 @@ function renderHousing() {
     const isBooked = !!h.selectedId;
 
     const optionsHtml = h.options.length === 0
-      ? `<p class="housing-empty">No options yet — paste a link to compare.</p>`
+      ? `<p class="housing-empty">No options added yet — paste a link below to compare.</p>`
       : `<div class="housing-options">${h.options.map(o => renderHousingOption(stop.id, o, h.selectedId)).join('')}</div>`;
+
+    const recsHtml = stop.recommendations && stop.recommendations.length > 0
+      ? `<div class="housing-recs">
+          <div class="housing-recs-head">Recommended Hotels</div>
+          <div class="housing-recs-list">
+            ${stop.recommendations.map(r => `
+              <a class="housing-rec-card housing-rec-${esc(r.tier.toLowerCase().replace('-',''))}" href="${esc(r.url)}" target="_blank" rel="noopener">
+                <div class="housing-rec-top">
+                  <span class="housing-rec-name">${esc(r.name)}</span>
+                  <span class="housing-rec-tier">${esc(r.tier)}</span>
+                </div>
+                <div class="housing-rec-note">${esc(r.note)}</div>
+              </a>
+            `).join('')}
+          </div>
+        </div>`
+      : '';
 
     return `<div class="housing-stop ${isBooked ? 'is-booked' : ''}">
       <div class="housing-stop-head">
@@ -727,6 +744,7 @@ function renderHousing() {
         </div>
         ${isBooked ? `<span class="housing-booked-pill">Booked ✓</span>` : ''}
       </div>
+      ${recsHtml}
       ${optionsHtml}
       <div class="housing-add-row">
         <div class="housing-url-row" id="url-wrap-${esc(stop.id)}" style="display:none">

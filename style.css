@@ -1565,6 +1565,68 @@ body {
   flex-shrink: 0;
 }
 
+/* ---------- HOUSING RECOMMENDATIONS ---------- */
+.housing-recs {
+  padding: 14px 18px 4px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.housing-recs-head {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+}
+.housing-recs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.housing-rec-card {
+  display: block;
+  text-decoration: none;
+  background: var(--paper-alt);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.housing-rec-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+.housing-rec-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.housing-rec-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.housing-rec-tier {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.housing-rec-luxury    .housing-rec-tier { background: var(--sun-soft);     color: var(--sun); }
+.housing-rec-midrange  .housing-rec-tier { background: var(--lavender-soft); color: var(--lavender); }
+.housing-rec-budget    .housing-rec-tier { background: var(--olive-soft);    color: var(--olive); }
+.housing-rec-note {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
 /* ---------- RESTAURANTS ---------- */
 .rest-stop {
   background: var(--paper);

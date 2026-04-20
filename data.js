@@ -191,10 +191,50 @@ const MEAL_SKIP_DAYS = new Set(['2026-07-17','2026-07-18','2026-08-01']);
 // HOUSING STOPS
 // ============================================================
 const HOUSING_STOPS = [
-  { id: 'sanary',  label: 'Sanary-sur-Mer',     checkIn: '2026-07-18', checkOut: '2026-07-22', nights: 4, taskId: 'hotel-sanary'  },
-  { id: 'aix',     label: 'Aix-en-Provence',    checkIn: '2026-07-22', checkOut: '2026-07-24', nights: 2, taskId: 'hotel-aix'     },
-  { id: 'verdon',  label: 'Verdon / Moustiers', checkIn: '2026-07-24', checkOut: '2026-07-26', nights: 2, taskId: 'hotel-verdon'  },
-  { id: 'avignon', label: 'Avignon',             checkIn: '2026-07-26', checkOut: '2026-07-29', nights: 3, taskId: 'hotel-avignon' },
-  { id: 'paris',   label: 'Paris',               checkIn: '2026-07-29', checkOut: '2026-07-31', nights: 2, taskId: 'hotel-paris'  },
-  { id: 'cdg',     label: 'CDG Airport Hotel',   checkIn: '2026-07-31', checkOut: '2026-08-01', nights: 1, taskId: 'hotel-cdg'   },
+  { id: 'sanary',  label: 'Sanary-sur-Mer',     checkIn: '2026-07-18', checkOut: '2026-07-22', nights: 4, taskId: 'hotel-sanary',
+    recommendations: [
+      { name: 'Hostellerie La Farandole',      tier: 'Luxury',    note: 'Right on the beach · pool · sea views · ~$250/night', url: 'https://www.hostellerielafarandole.com/en' },
+      { name: 'Le Synaya',                     tier: 'Mid-range', note: 'Harbor views · great breakfast · popular with couples', url: 'https://www.hotelsynaya.com/' },
+      { name: 'Adonis Grand Hôtel des Bains',  tier: 'Mid-range', note: '3★ · park setting · 2-min walk to beach · ~$106/night', url: 'https://www.adonis-sanary.com/en/adonis-sanary-sur-mer-hotel/' },
+      { name: 'Best Western Plus Sanary',      tier: 'Budget',    note: 'Reliable chain · solid value for 4 nights', url: 'https://www.booking.com/hotel/fr/best-western-plus-le-moderne.html' },
+    ]
+  },
+  { id: 'aix',     label: 'Aix-en-Provence',    checkIn: '2026-07-22', checkOut: '2026-07-24', nights: 2, taskId: 'hotel-aix',
+    recommendations: [
+      { name: "La Maison d'Aix",               tier: 'Luxury',    note: 'Mazarin quarter · pool & hammam · called "most romantic hotel in France"', url: 'https://www.lamaisondaix.com/en/home' },
+      { name: 'Boutique Hotel Cézanne',        tier: 'Mid-range', note: 'Mazarin district · sun terrace · acclaimed breakfast · near Cours Mirabeau', url: 'https://boutiquehotelcezanne.com/en/' },
+      { name: 'Hotel Les Augustins',           tier: 'Mid-range', note: 'Set inside a 12th-century convent · just off Cours Mirabeau', url: 'https://hotel-augustins.com/en/home/' },
+      { name: 'Grand Hôtel Roi René MGallery', tier: 'Mid-range', note: '4★ · 5-min walk to Cours Mirabeau · outdoor heated pool', url: 'https://www.grandhotelroirene-aixenprovence.com/' },
+    ]
+  },
+  { id: 'verdon',  label: 'Verdon / Moustiers', checkIn: '2026-07-24', checkOut: '2026-07-26', nights: 2, taskId: 'hotel-verdon',
+    recommendations: [
+      { name: 'La Bastide de Moustiers',       tier: 'Luxury',    note: 'Maison Ducasse hotel · 1-star Michelin restaurant · book early, fills fast', url: 'https://www.bastide-moustiers.com/en/' },
+      { name: 'Hôtel Les Restanques',          tier: 'Mid-range', note: '3★ · at the gorge entrance · heated pool · Nordic bath · terraces', url: 'https://www.hotel-les-restanques.com/' },
+      { name: 'La Ferme Rose',                 tier: 'Mid-range', note: 'Charming hotel de charme · 9.0 guest rating across 1,300+ reviews', url: 'https://www.lafermerose.com/' },
+      { name: 'Hôtel Le Colombier',            tier: 'Budget',    note: 'Pool · spa · romantic vibe · well-reviewed for the price', url: 'https://www.hotelcolombier.com/' },
+    ]
+  },
+  { id: 'avignon', label: 'Avignon',             checkIn: '2026-07-26', checkOut: '2026-07-29', nights: 3, taskId: 'hotel-avignon',
+    recommendations: [
+      { name: 'La Mirande',                    tier: 'Luxury',    note: 'Steps from Palais des Papes · Michelin restaurant · ~$400–1000/night', url: 'https://www.la-mirande.fr/en/' },
+      { name: "Hôtel d'Europe",                tier: 'Luxury',    note: "Avignon's oldest hotel (16th century) · romantic courtyard restaurant", url: 'https://heurope.com/en/' },
+      { name: 'Hotel Boquier',                 tier: 'Mid-range', note: 'Inside the walls · 5-min walk to Palais des Papes & train station', url: 'https://www.hotel-boquier.com/en' },
+      { name: 'Le Magnan',                     tier: 'Budget',    note: '3★ · inside the ramparts · garden-view rooms · near train station', url: 'https://www.hotel-magnan.com' },
+    ]
+  },
+  { id: 'paris',   label: 'Paris',               checkIn: '2026-07-29', checkOut: '2026-07-31', nights: 2, taskId: 'hotel-paris',
+    recommendations: [
+      { name: 'Le Narcisse Blanc Hôtel & Spa', tier: 'Luxury',    note: "7th arr. · between Seine & Eiffel Tower · Belle Époque mansion · spa", url: 'https://www.lenarcisseblanc.com/en' },
+      { name: 'Le Grand Hôtel Cayré',          tier: 'Mid-range', note: "7th arr. · near Musée d'Orsay · Le Labo toiletries · flexible pricing", url: 'https://www.miirohotels.com/legrandhotelcayre' },
+      { name: 'Hôtel Récamier',                tier: 'Mid-range', note: '6th arr. · quiet square in Saint-Germain · steps from Luxembourg Gardens', url: 'https://en.hotelrecamier.com/' },
+      { name: 'Hôtel du Cadran',               tier: 'Budget',    note: '7th arr. · near Eiffel Tower · clean, well-located, great value', url: 'https://www.cadranhotel.com/' },
+    ]
+  },
+  { id: 'cdg',     label: 'CDG Airport Hotel',   checkIn: '2026-07-31', checkOut: '2026-08-01', nights: 1, taskId: 'hotel-cdg',
+    recommendations: [
+      { name: 'Sheraton Paris CDG',            tier: 'Mid-range', note: 'Directly connected to Terminal 2 · walk to check-in · no shuttle needed', url: 'https://www.marriott.com/en-us/hotels/parsi-sheraton-paris-charles-de-gaulle-airport-hotel/overview/' },
+      { name: 'Pullman Paris CDG',             tier: 'Mid-range', note: 'Upscale design hotel · 5-min CDGVAL shuttle to all terminals', url: 'https://www.pullmanparisroissycdg.com/en/' },
+    ]
+  },
 ];
