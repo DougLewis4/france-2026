@@ -779,6 +779,27 @@ function renderHousing() {
     const range = p1 && p2 ? `${p1.mon} ${p1.day} – ${p2.mon} ${p2.day}` : '';
     const isBooked = !!h.selectedId;
 
+    if (isBooked) {
+      const opt = h.options.find(o => o.id === h.selectedId);
+      const display = opt.listingId ? `${esc(opt.site)} #${esc(opt.listingId)}` : esc(opt.site);
+      return `<div class="housing-stop is-booked">
+        <div class="housing-stop-head">
+          <div>
+            <div class="housing-stop-label">${esc(stop.label)}</div>
+            <div class="housing-stop-meta">${esc(range)} · ${stop.nights} night${stop.nights > 1 ? 's' : ''}</div>
+          </div>
+          <span class="housing-booked-pill">Booked ✓</span>
+        </div>
+        <div class="housing-booked-summary">
+          <a class="housing-opt-link" href="${esc(opt.url)}" target="_blank" rel="noopener">${display} ↗</a>
+          ${opt.name  ? `<div class="housing-booked-name">${esc(opt.name)}</div>` : ''}
+          ${opt.price ? `<div class="housing-booked-price">$${esc(opt.price)} / night</div>` : ''}
+          ${opt.notes ? `<div class="housing-booked-notes">${esc(opt.notes)}</div>` : ''}
+          <button class="housing-change-btn" data-housing-select="${esc(stop.id)}" data-option="${esc(opt.id)}">Change booking</button>
+        </div>
+      </div>`;
+    }
+
     const optionsHtml = h.options.length === 0
       ? `<p class="housing-empty">No options added yet — paste a link below to compare.</p>`
       : `<div class="housing-options">${h.options.map(o => renderHousingOption(stop.id, o, h.selectedId)).join('')}</div>`;
@@ -800,13 +821,12 @@ function renderHousing() {
         </div>`
       : '';
 
-    return `<div class="housing-stop ${isBooked ? 'is-booked' : ''}">
+    return `<div class="housing-stop">
       <div class="housing-stop-head">
         <div>
           <div class="housing-stop-label">${esc(stop.label)}</div>
           <div class="housing-stop-meta">${esc(range)} · ${stop.nights} night${stop.nights > 1 ? 's' : ''}</div>
         </div>
-        ${isBooked ? `<span class="housing-booked-pill">Booked ✓</span>` : ''}
       </div>
       ${recsHtml}
       ${optionsHtml}

@@ -1391,6 +1391,46 @@ body {
   padding: 4px 10px;
   border-radius: 999px;
 }
+.housing-booked-summary {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.housing-booked-name {
+  font-size: 1rem;
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--ink);
+}
+.housing-booked-price {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.housing-booked-notes {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.housing-change-btn {
+  margin-top: 4px;
+  width: fit-content;
+  padding: 7px 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.housing-change-btn:hover { border-color: var(--urg-over); color: var(--urg-over); }
+
 .housing-empty {
   padding: 20px 20px 4px;
   color: var(--ink-muted);
