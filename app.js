@@ -194,7 +194,7 @@ function renderBudget() {
   const actEl = document.getElementById('budget-actual');
   const barEl = document.getElementById('budget-bar');
   if (estEl) estEl.textContent = `$${est.toLocaleString()}`;
-  if (actEl) actEl.textContent = `$${actual.toLocaleString()}`;
+  if (actEl) actEl.textContent = `$${Math.round(actual).toLocaleString()}`;
   if (barEl) barEl.style.width = est > 0 ? `${Math.min(100, (actual / est) * 100)}%` : '0%';
 }
 
