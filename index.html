@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 <body data-screen-label="France 2026 Dashboard">
 
@@ -137,6 +138,9 @@
             </div>
             <div class="section-sub">Jul 17 — Aug 1, 2026</div>
           </div>
+          <div class="trip-map-card">
+            <div id="trip-map"></div>
+          </div>
           <div class="itinerary" id="itinerary-wrap"></div>
         </div>
 
@@ -191,6 +195,7 @@
     })();
   </script>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WPaM=" crossorigin=""></script>
   <script src="data.js?v=3"></script>
   <script src="app.js?v=3"></script>
 </body>

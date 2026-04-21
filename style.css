@@ -1897,5 +1897,69 @@ body {
 }
 .itin-meal-blank { color: var(--ink-muted); font-size: 0.78rem; }
 
+/* ---------- TRIP MAP ---------- */
+.trip-map-card {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+#trip-map {
+  height: 320px;
+  width: 100%;
+  background: var(--paper-alt);
+}
+@media (max-width: 600px) {
+  #trip-map { height: 220px; }
+}
+
+/* Custom marker pin */
+.map-pin {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--paper);
+  font-family: var(--ff-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.map-pin:hover { transform: scale(1.15); }
+
+/* Popup */
+.map-popup-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--ff-body);
+  line-height: 1.4;
+}
+.map-popup-inner strong {
+  font-size: 0.85rem;
+  color: var(--ink);
+  font-weight: 700;
+}
+.map-popup-inner span {
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+  padding: 0 !important;
+}
+.leaflet-popup-content {
+  margin: 10px 14px !important;
+}
+.leaflet-popup-tip-container { display: none; }
+
 /* ---------- utilities ---------- */
 .hidden { display: none !important; }

@@ -188,6 +188,18 @@ const RESTAURANT_STOPS = [
 const MEAL_SKIP_DAYS = new Set(['2026-07-17','2026-07-18','2026-08-01']);
 
 // ============================================================
+// MAP STOPS  (France only, in route order)
+// ============================================================
+const MAP_STOPS = [
+  { label: 'Sanary-sur-Mer',   sub: 'Jul 18–22 · Coast & Wedding',  lat: 43.1175, lng: 5.8011  },
+  { label: 'Aix-en-Provence',  sub: 'Jul 23–24',                     lat: 43.5297, lng: 5.4474  },
+  { label: 'Valensole',        sub: 'Jul 24 · Lavender Fields',       lat: 43.8368, lng: 6.0134  },
+  { label: 'Gorges du Verdon', sub: 'Jul 25',                         lat: 43.7726, lng: 6.3494  },
+  { label: 'Avignon',          sub: 'Jul 26–28',                      lat: 43.9493, lng: 4.8055  },
+  { label: 'Paris',            sub: 'Jul 29–31',                      lat: 48.8566, lng: 2.3522  },
+];
+
+// ============================================================
 // HOUSING STOPS
 // ============================================================
 const HOUSING_STOPS = [

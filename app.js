@@ -437,6 +437,48 @@ function applyTweaks() {
 function setupTweaksListener() {}
 
 // ============================================================
+// MAP
+// ============================================================
+let tripMap = null;
+
+function initTripMap() {
+  const el = document.getElementById('trip-map');
+  if (!el) return;
+
+  if (tripMap) {
+    tripMap.invalidateSize();
+    return;
+  }
+
+  const latlngs = MAP_STOPS.map(s => [s.lat, s.lng]);
+
+  tripMap = L.map('trip-map', { scrollWheelZoom: false, zoomControl: true });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(tripMap);
+
+  L.polyline(latlngs, { color: '#1a3550', weight: 2, opacity: 0.45, dashArray: '6 9' }).addTo(tripMap);
+
+  MAP_STOPS.forEach((stop, i) => {
+    const icon = L.divIcon({
+      html: `<div class="map-pin"><span>${i + 1}</span></div>`,
+      className: '',
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+      popupAnchor: [0, -18],
+    });
+    L.marker([stop.lat, stop.lng], { icon })
+      .addTo(tripMap)
+      .bindPopup(`<div class="map-popup-inner"><strong>${esc(stop.label)}</strong><span>${esc(stop.sub)}</span></div>`, { closeButton: false });
+  });
+
+  tripMap.fitBounds(latlngs, { padding: [32, 32] });
+}
+
+// ============================================================
 // EVENTS
 // ============================================================
 function setupEvents() {
@@ -475,6 +517,7 @@ function setupEvents() {
     if (pbtn) {
       currentPane = pbtn.dataset.pane;
       applyTweaks();
+      if (currentPane === 'itinerary') setTimeout(initTripMap, 60);
       return;
     }
 
