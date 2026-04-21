@@ -22,18 +22,36 @@ let currentPane   = 'checklist'; // for tabbed layout
 // ============================================================
 // STATE
 // ============================================================
-function loadState() {
+const FB_PATH = 'france2026';
+
+async function loadState() {
+  let saved = null;
+
+  // Try Firebase first
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-             || localStorage.getItem('france2026_v1'); // migrate from original key
-    if (raw) {
-      const saved  = JSON.parse(raw);
-      state        = saved.state        || {};
-      itinExpanded = saved.itinExpanded || {};
-      housingData    = saved.housingData    || {};
-      restaurantData = saved.restaurantData || [];
+    const snapshot = await firebase.database().ref(FB_PATH).get();
+    if (snapshot.exists()) {
+      saved = snapshot.val();
     }
   } catch (e) {}
+
+  // Fall back to localStorage (also migrates old data up to Firebase)
+  if (!saved) {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('france2026_v1');
+      if (raw) {
+        saved = JSON.parse(raw);
+        try { firebase.database().ref(FB_PATH).set(saved); } catch(e) {}
+      }
+    } catch (e) {}
+  }
+
+  if (saved) {
+    state          = saved.state          || {};
+    itinExpanded   = saved.itinExpanded   || {};
+    housingData    = saved.housingData    || {};
+    restaurantData = saved.restaurantData || [];
+  }
 
   CATEGORIES.forEach(cat => {
     cat.tasks.forEach(task => {
@@ -51,8 +69,11 @@ function loadState() {
     if (!housingData[stop.id]) housingData[stop.id] = { options: [], selectedId: null };
   });
 }
+
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, itinExpanded, housingData, restaurantData }));
+  const data = { state, itinExpanded, housingData, restaurantData };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try { firebase.database().ref(FB_PATH).set(data); } catch(e) {}
 }
 
 // ============================================================
@@ -954,8 +975,8 @@ function renderAll() {
 // ============================================================
 // INIT
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
-  loadState();
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadState();
   setupTweaksListener();
   setupEvents();
   renderAll();
