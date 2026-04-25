@@ -808,7 +808,10 @@ function renderHousing() {
           <span class="housing-booked-pill">Booked ✓</span>
         </div>
         <div class="housing-booked-summary">
-          <a class="housing-opt-link" href="${esc(opt.url)}" target="_blank" rel="noopener">${display} ↗</a>
+          <input class="housing-field housing-booked-url-field" type="url" placeholder="Listing URL"
+            value="${esc(opt.url)}"
+            data-housing-field="url" data-stop="${esc(stop.id)}" data-option="${esc(opt.id)}"/>
+          ${opt.url ? `<a class="housing-opt-link" href="${esc(opt.url)}" target="_blank" rel="noopener">${display} ↗</a>` : ''}
           ${opt.name  ? `<div class="housing-booked-name">${esc(opt.name)}</div>` : ''}
           ${opt.price ? `<div class="housing-booked-price">$${esc(opt.price)} / night</div>` : ''}
           ${opt.notes ? `<div class="housing-booked-notes">${esc(opt.notes)}</div>` : ''}
