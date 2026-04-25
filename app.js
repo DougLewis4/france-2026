@@ -740,6 +740,11 @@ function updateHousingOption(stopId, optionId, field, value) {
   const opt = housingData[stopId]?.options.find(o => o.id === optionId);
   if (!opt) return;
   opt[field] = value;
+  if (field === 'url') {
+    const parsed = parseListingUrl(value.trim());
+    if (parsed.valid) { opt.site = parsed.site; opt.listingId = parsed.listingId; }
+    renderHousing(); return;
+  }
   // If price changes on the selected option, sync to task actual cost
   if (field === 'price' && housingData[stopId].selectedId === optionId) {
     const hs = HOUSING_STOPS.find(s => s.id === stopId);
@@ -757,6 +762,9 @@ function renderHousingOption(stopId, opt, selectedId) {
       <button class="housing-opt-del" data-housing-delete="${esc(stopId)}" data-option="${esc(opt.id)}" title="Remove">✕</button>
     </div>
     <div class="housing-opt-fields">
+      <input class="housing-field" placeholder="Listing URL"
+        value="${esc(opt.url)}"
+        data-housing-field="url" data-stop="${esc(stopId)}" data-option="${esc(opt.id)}"/>
       <input class="housing-field" placeholder="Nickname (e.g. Sunny terrace apt)"
         value="${esc(opt.name)}"
         data-housing-field="name" data-stop="${esc(stopId)}" data-option="${esc(opt.id)}"/>
