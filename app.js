@@ -909,11 +909,9 @@ function renderDayFooter(date) {
     return `<div class="itin-footer-col">
       <div class="itin-footer-head">Stay · ${esc(stop.label)}</div>
       ${opt
-        ? `<div class="itin-stay-row">
-             <div class="itin-stay-name">${esc(opt.name || display)}</div>
-             <a class="itin-stay-link" href="${esc(opt.url)}" target="_blank" rel="noopener">View ↗</a>
-           </div>
-           ${opt.notes ? `<div class="itin-stay-notes">${esc(opt.notes)}</div>` : ''}`
+        ? `<div class="itin-stay-name">${esc(opt.name || display)}</div>
+           ${opt.notes ? `<div class="itin-stay-notes">${esc(opt.notes)}</div>` : ''}
+           <a class="itin-stay-link" href="${esc(opt.url)}" target="_blank" rel="noopener">View listing ↗</a>`
         : `<div class="itin-stay-empty">Not booked yet</div>`}
     </div>`;
   })() : '';
