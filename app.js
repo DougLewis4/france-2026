@@ -345,7 +345,7 @@ function renderItinerary() {
             `).join('')}
           </div>
         </div>
-        ${renderDayMeals(day.date)}
+        ${renderDayFooter(day.date)}
       </div>
     </article>`;
   }).join('');
@@ -868,24 +868,57 @@ function parseGoogleMapsUrl(url) {
 const MEAL_ORDER = ['breakfast', 'lunch', 'dinner'];
 const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
 
-function renderDayMeals(date) {
-  if (MEAL_SKIP_DAYS.has(date)) return '';
-  const dayRests = restaurantData.filter(r => r.date === date);
-  const rows = MEAL_ORDER.map(meal => {
-    const r = dayRests.find(r => r.meal === meal);
-    if (r) {
-      return `<div class="itin-meal-row">
-        <span class="itin-meal-type meal-${esc(meal)}">${MEAL_LABEL[meal]}</span>
-        <a class="itin-meal-link" href="${esc(r.url || '#')}" target="_blank" rel="noopener">${esc(r.name || 'View on Maps')} ↗</a>
-        ${r.notes ? `<span class="itin-meal-notes">${esc(r.notes)}</span>` : ''}
+function getHousingForDate(date) {
+  const stop = HOUSING_STOPS.find(s => s.checkIn <= date && date < s.checkOut);
+  if (!stop) return null;
+  const h = housingData[stop.id];
+  const opt = h?.selectedId ? h.options.find(o => o.id === h.selectedId) : null;
+  return { stop, opt };
+}
+
+function renderDayFooter(date) {
+  const skipDining = MEAL_SKIP_DAYS.has(date);
+  const housing = getHousingForDate(date);
+  if (skipDining && !housing) return '';
+
+  const diningHtml = skipDining ? '' : (() => {
+    const dayRests = restaurantData.filter(r => r.date === date);
+    const rows = MEAL_ORDER.map(meal => {
+      const r = dayRests.find(r => r.meal === meal);
+      if (r) {
+        return `<div class="itin-meal-row">
+          <span class="itin-meal-type meal-${esc(meal)}">${MEAL_LABEL[meal]}</span>
+          <a class="itin-meal-link" href="${esc(r.url || '#')}" target="_blank" rel="noopener">${esc(r.name || 'View on Maps')} ↗</a>
+          ${r.notes ? `<span class="itin-meal-notes">${esc(r.notes)}</span>` : ''}
+        </div>`;
+      }
+      return `<div class="itin-meal-row itin-meal-empty">
+        <span class="itin-meal-type">${MEAL_LABEL[meal]}</span>
+        <span class="itin-meal-blank">—</span>
       </div>`;
-    }
-    return `<div class="itin-meal-row itin-meal-empty">
-      <span class="itin-meal-type">${MEAL_LABEL[meal]}</span>
-      <span class="itin-meal-blank">—</span>
+    }).join('');
+    return `<div class="itin-footer-col">
+      <div class="itin-footer-head">Dining</div>
+      ${rows}
     </div>`;
-  }).join('');
-  return `<div class="itin-meals"><div class="itin-meals-head">Dining</div>${rows}</div>`;
+  })();
+
+  const housingHtml = housing ? (() => {
+    const { stop, opt } = housing;
+    const display = opt?.listingId ? `${esc(opt.site)} #${esc(opt.listingId)}` : opt ? esc(opt.site) : '';
+    return `<div class="itin-footer-col">
+      <div class="itin-footer-head">Stay · ${esc(stop.label)}</div>
+      ${opt
+        ? `<a class="itin-stay-link" href="${esc(opt.url)}" target="_blank" rel="noopener">${display} ↗</a>
+           ${opt.name  ? `<div class="itin-stay-name">${esc(opt.name)}</div>` : ''}
+           ${opt.notes ? `<div class="itin-stay-notes">${esc(opt.notes)}</div>` : ''}`
+        : `<div class="itin-stay-empty">Not booked yet</div>`}
+    </div>`;
+  })() : '';
+
+  return `<div class="itin-footer ${!diningHtml || !housingHtml ? 'itin-footer-single' : ''}">
+    ${diningHtml}${housingHtml}
+  </div>`;
 }
 
 function renderRestaurantCard(r) {

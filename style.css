@@ -1882,6 +1882,61 @@ body {
 }
 .rest-form-cancel:hover { border-color: var(--ink-soft); color: var(--ink); }
 
+/* Itinerary day footer: dining + stay two-column */
+.itin-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 14px;
+  border-top: 1px dashed var(--rule);
+}
+.itin-footer.itin-footer-single { grid-template-columns: 1fr; }
+.itin-footer-col {
+  padding: 12px 16px 4px;
+  border-right: 1px dashed var(--rule);
+}
+.itin-footer-col:last-child { border-right: none; }
+@media (max-width: 600px) {
+  .itin-footer { grid-template-columns: 1fr; }
+  .itin-footer-col { border-right: none; border-bottom: 1px dashed var(--rule); }
+  .itin-footer-col:last-child { border-bottom: none; }
+}
+.itin-footer-head {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+.itin-stay-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 4px;
+}
+.itin-stay-link:hover { text-decoration: underline; }
+.itin-stay-name {
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.itin-stay-notes {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.itin-stay-empty {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
 /* Itinerary meal rows (inside expanded day) */
 .itin-meals {
   margin-top: 14px;
