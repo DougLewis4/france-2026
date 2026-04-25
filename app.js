@@ -713,10 +713,12 @@ function selectHousingOption(stopId, optionId) {
   const hs = HOUSING_STOPS.find(s => s.id === stopId);
   if (h.selectedId === optionId) {
     h.selectedId = null;
-    if (hs && state[hs.taskId]) state[hs.taskId] = { ...state[hs.taskId], status: 'not-started' };
+    if (hs && state[hs.taskId]) state[hs.taskId] = { ...state[hs.taskId], status: 'not-started', actualCost: 0 };
   } else {
     h.selectedId = optionId;
-    if (hs && state[hs.taskId]) state[hs.taskId] = { ...state[hs.taskId], status: 'booked' };
+    const opt = h.options.find(o => o.id === optionId);
+    const totalCost = opt ? (parseFloat(opt.price) || 0) * hs.nights : 0;
+    if (hs && state[hs.taskId]) state[hs.taskId] = { ...state[hs.taskId], status: 'booked', actualCost: totalCost };
   }
   saveState();
   renderAll();
@@ -736,7 +738,14 @@ function deleteHousingOption(stopId, optionId) {
 
 function updateHousingOption(stopId, optionId, field, value) {
   const opt = housingData[stopId]?.options.find(o => o.id === optionId);
-  if (opt) { opt[field] = value; saveState(); }
+  if (!opt) return;
+  opt[field] = value;
+  // If price changes on the selected option, sync to task actual cost
+  if (field === 'price' && housingData[stopId].selectedId === optionId) {
+    const hs = HOUSING_STOPS.find(s => s.id === stopId);
+    if (hs && state[hs.taskId]) state[hs.taskId] = { ...state[hs.taskId], actualCost: (parseFloat(value) || 0) * hs.nights };
+  }
+  saveState();
 }
 
 function renderHousingOption(stopId, opt, selectedId) {
