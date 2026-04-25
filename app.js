@@ -20,8 +20,6 @@ let customTasks    = [];
 let openDrawerTaskId = null;
 let currentFilter = 'all';  // all | open | booked | done
 let currentPane   = 'checklist'; // for tabbed layout
-let editUnlocked  = false;
-let pendingEditFn = null;
 
 // ============================================================
 // STATE
