@@ -150,7 +150,7 @@ function attemptPin() {
 function updateLockIndicator() {
   const el = document.getElementById('lock-indicator');
   if (!el) return;
-  el.textContent = editUnlocked ? '✏️ Editing' : '🔒 Locked';
+  el.textContent = editUnlocked ? '✏️' : '🔒';
   el.classList.toggle('unlocked', editUnlocked);
 }
 
