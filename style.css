@@ -863,6 +863,15 @@ body {
   color: var(--paper);
   border-color: var(--ink);
 }
+.add-task-btn {
+  margin-left: auto;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+.add-task-btn:hover {
+  background: var(--accent) !important;
+  color: var(--paper) !important;
+}
 
 
 /* ---------- ITINERARY BANNER ---------- */
@@ -1257,6 +1266,35 @@ body {
   transition: background 0.15s;
 }
 .drawer-close:hover { background: var(--accent); }
+.drawer-actions {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 20px;
+}
+.drawer-actions .drawer-close {
+  flex: 1;
+  margin-top: 12px;
+  width: auto;
+}
+.drawer-delete {
+  flex: 0 0 auto;
+  margin-top: 12px;
+  padding: 13px 18px;
+  background: transparent;
+  color: var(--urg-over);
+  border: 1px solid var(--urg-over);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.drawer-delete:hover { background: var(--urg-over); color: var(--paper); }
+.drawer-input-full { width: 100%; display: block; }
+.drawer-label-opt { font-weight: 400; color: var(--ink-muted); }
 
 
 /* ---------- TWEAKS PANEL ---------- */

@@ -15,6 +15,7 @@ let state          = {};
 let itinExpanded   = {};
 let housingData    = {};
 let restaurantData = [];
+let customTasks    = [];
 let openDrawerTaskId = null;
 let currentFilter = 'all';  // all | open | booked | done
 let currentPane   = 'checklist'; // for tabbed layout
@@ -51,6 +52,7 @@ async function loadState() {
     itinExpanded   = saved.itinExpanded   || {};
     housingData    = saved.housingData    || {};
     restaurantData = saved.restaurantData || [];
+    customTasks    = saved.customTasks    || [];
   }
 
   CATEGORIES.forEach(cat => {
@@ -71,7 +73,7 @@ async function loadState() {
 }
 
 function saveState() {
-  const data = { state, itinExpanded, housingData, restaurantData };
+  const data = { state, itinExpanded, housingData, restaurantData, customTasks };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   try { firebase.database().ref(FB_PATH).set(data); } catch(e) {}
 }
@@ -80,7 +82,8 @@ function saveState() {
 // HELPERS
 // ============================================================
 function allTasks() {
-  return CATEGORIES.flatMap(c => c.tasks.map(t => ({ ...t, catId: c.id, catLabel: c.label })));
+  const builtIn = CATEGORIES.flatMap(c => c.tasks.map(t => ({ ...t, catId: c.id, catLabel: c.label })));
+  return [...builtIn, ...customTasks].filter(t => !state[t.id]?.hidden);
 }
 function dueInfo(dueDate) {
   if (!dueDate) return { cls: 'none', label: '—', diff: Infinity };
@@ -402,7 +405,10 @@ function openDrawer(taskId) {
       ${task.hint ? `<div class="drawer-hint">${esc(task.hint)}</div>` : ''}
     </div>
 
-    <button class="drawer-close" id="drawer-close-btn">Save &amp; close</button>
+    <div class="drawer-actions">
+      <button class="drawer-close" id="drawer-close-btn">Save &amp; close</button>
+      <button class="drawer-delete" id="drawer-delete-btn">Delete</button>
+    </div>
   `;
   document.getElementById('drawer-overlay').classList.remove('hidden');
 }
@@ -424,6 +430,66 @@ function closeDrawer() {
   state[openDrawerTaskId] = { ...state[openDrawerTaskId], status, actualCost: actVal, notes };
   saveState();
 
+  document.getElementById('drawer-overlay').classList.add('hidden');
+  openDrawerTaskId = null;
+  renderAll();
+}
+
+function openAddTaskDrawer() {
+  openDrawerTaskId = null;
+  const content = document.getElementById('drawer-content');
+  content.innerHTML = `
+    <div class="drawer-eyebrow">Checklist</div>
+    <div class="drawer-title">New Task</div>
+
+    <div class="drawer-field">
+      <div class="drawer-label">Title</div>
+      <input class="drawer-input drawer-input-full" id="new-task-title" placeholder="What needs doing?"/>
+    </div>
+
+    <div class="drawer-field">
+      <div class="drawer-label">Category</div>
+      <select class="drawer-select" id="new-task-cat">
+        ${CATEGORIES.map(c => `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('')}
+      </select>
+    </div>
+
+    <div class="drawer-field">
+      <div class="drawer-label">Due date <span class="drawer-label-opt">(optional)</span></div>
+      <input class="drawer-input drawer-input-full" id="new-task-due" type="date"/>
+    </div>
+
+    <div class="drawer-actions">
+      <button class="drawer-close" id="drawer-add-save-btn">Add task</button>
+      <button class="drawer-delete" id="drawer-add-cancel-btn">Cancel</button>
+    </div>
+  `;
+  document.getElementById('drawer-overlay').classList.remove('hidden');
+}
+
+function saveNewTask() {
+  const title = document.getElementById('new-task-title')?.value.trim();
+  if (!title) { document.getElementById('new-task-title').style.borderColor = 'var(--urg-over)'; return; }
+  const catId = document.getElementById('new-task-cat')?.value;
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const due = document.getElementById('new-task-due')?.value || null;
+  const id = 'custom_' + Date.now();
+  customTasks.push({ id, title, catId, catLabel: cat?.label || 'Custom', dueDate: due, estimatedCost: 0, hint: '' });
+  state[id] = { status: 'not-started', actualCost: 0, notes: '' };
+  saveState();
+  document.getElementById('drawer-overlay').classList.add('hidden');
+  renderAll();
+}
+
+function deleteTask(taskId) {
+  const isCustom = customTasks.some(t => t.id === taskId);
+  if (isCustom) {
+    customTasks = customTasks.filter(t => t.id !== taskId);
+    delete state[taskId];
+  } else {
+    state[taskId] = { ...state[taskId], hidden: true };
+  }
+  saveState();
   document.getElementById('drawer-overlay').classList.add('hidden');
   openDrawerTaskId = null;
   renderAll();
@@ -552,9 +618,13 @@ function setupEvents() {
       return;
     }
 
-    // Drawer close
-    if (e.target.id === 'drawer-close-btn') { closeDrawer(); return; }
-    if (e.target.id === 'drawer-overlay')   { closeDrawer(); return; }
+    // Drawer actions
+    if (e.target.id === 'drawer-close-btn')    { closeDrawer(); return; }
+    if (e.target.id === 'drawer-overlay')      { closeDrawer(); return; }
+    if (e.target.id === 'drawer-delete-btn')   { deleteTask(openDrawerTaskId); return; }
+    if (e.target.id === 'drawer-add-save-btn') { saveNewTask(); return; }
+    if (e.target.id === 'drawer-add-cancel-btn') { document.getElementById('drawer-overlay').classList.add('hidden'); return; }
+    if (e.target.id === 'add-task-btn')        { openAddTaskDrawer(); return; }
 
     // Housing: show URL input
     const addBtn = e.target.closest('[data-housing-add]');
