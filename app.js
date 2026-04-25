@@ -10,6 +10,7 @@ function esc(str) {
 
 const STORAGE_KEY = 'france2026_v2';
 const DEPARTURE   = new Date('2026-07-17T15:00:00');
+const PIN_SECRET  = '0418';
 
 let state          = {};
 let itinExpanded   = {};
@@ -19,6 +20,8 @@ let customTasks    = [];
 let openDrawerTaskId = null;
 let currentFilter = 'all';  // all | open | booked | done
 let currentPane   = 'checklist'; // for tabbed layout
+let editUnlocked  = false;
+let pendingEditFn = null;
 
 // ============================================================
 // STATE
@@ -76,6 +79,81 @@ function saveState() {
   const data = { state, itinExpanded, housingData, restaurantData, customTasks };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   try { firebase.database().ref(FB_PATH).set(data); } catch(e) {}
+}
+
+// ============================================================
+// PIN / EDIT LOCK
+// ============================================================
+let editUnlocked  = localStorage.getItem('france2026_unlocked') === '1';
+let pendingEditFn = null;
+
+function requireEdit(fn) {
+  if (editUnlocked) { fn(); return; }
+  pendingEditFn = fn;
+  showPinModal();
+}
+
+function showPinModal() {
+  let modal = document.getElementById('pin-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'pin-modal';
+    modal.className = 'pin-modal';
+    modal.innerHTML = `
+      <div class="pin-modal-box">
+        <div class="pin-modal-icon">🔒</div>
+        <div class="pin-modal-title">Editor PIN required</div>
+        <div class="pin-modal-sub">Enter your PIN to make changes</div>
+        <input class="pin-modal-input" id="pin-input" type="password"
+          inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off"/>
+        <div class="pin-modal-error" id="pin-error"></div>
+        <div class="pin-modal-actions">
+          <button class="pin-modal-submit" id="pin-submit">Unlock</button>
+          <button class="pin-modal-cancel" id="pin-cancel">Cancel</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('pin-submit').addEventListener('click', attemptPin);
+    document.getElementById('pin-cancel').addEventListener('click', hidePinModal);
+    document.getElementById('pin-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptPin();
+    });
+  }
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').textContent = '';
+  modal.classList.remove('hidden');
+  setTimeout(() => document.getElementById('pin-input')?.focus(), 50);
+}
+
+function hidePinModal() {
+  const modal = document.getElementById('pin-modal');
+  if (modal) modal.classList.add('hidden');
+  pendingEditFn = null;
+}
+
+function attemptPin() {
+  const val = document.getElementById('pin-input')?.value;
+  if (val === PIN_SECRET) {
+    editUnlocked = true;
+    localStorage.setItem('france2026_unlocked', '1');
+    hidePinModal();
+    updateLockIndicator();
+    if (pendingEditFn) { const fn = pendingEditFn; pendingEditFn = null; fn(); }
+  } else {
+    const err = document.getElementById('pin-error');
+    const box = document.getElementById('pin-input');
+    err.textContent = 'Incorrect PIN — try again';
+    box.value = '';
+    box.classList.add('pin-shake');
+    setTimeout(() => box.classList.remove('pin-shake'), 500);
+  }
+}
+
+function updateLockIndicator() {
+  const el = document.getElementById('lock-indicator');
+  if (!el) return;
+  el.textContent = editUnlocked ? '✏️ Editing' : '🔒 Locked';
+  el.classList.toggle('unlocked', editUnlocked);
 }
 
 // ============================================================
@@ -575,10 +653,12 @@ function setupEvents() {
     if (check) {
       e.stopPropagation();
       const taskId = check.dataset.check;
-      const cur = state[taskId]?.status;
-      state[taskId] = { ...state[taskId], status: cur === 'done' ? 'not-started' : 'done' };
-      saveState();
-      renderAll();
+      requireEdit(() => {
+        const cur = state[taskId]?.status;
+        state[taskId] = { ...state[taskId], status: cur === 'done' ? 'not-started' : 'done' };
+        saveState();
+        renderAll();
+      });
       return;
     }
 
@@ -595,7 +675,6 @@ function setupEvents() {
       currentFilter = fbtn.dataset.filter;
       document.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b === fbtn));
       renderChecklist();
-      renderProposal();
       return;
     }
 
@@ -619,12 +698,12 @@ function setupEvents() {
     }
 
     // Drawer actions
-    if (e.target.id === 'drawer-close-btn')    { closeDrawer(); return; }
-    if (e.target.id === 'drawer-overlay')      { closeDrawer(); return; }
-    if (e.target.id === 'drawer-delete-btn')   { deleteTask(openDrawerTaskId); return; }
-    if (e.target.id === 'drawer-add-save-btn') { saveNewTask(); return; }
+    if (e.target.id === 'drawer-close-btn')    { requireEdit(closeDrawer); return; }
+    if (e.target.id === 'drawer-overlay')      { document.getElementById('drawer-overlay').classList.add('hidden'); openDrawerTaskId = null; return; }
+    if (e.target.id === 'drawer-delete-btn')   { requireEdit(() => deleteTask(openDrawerTaskId)); return; }
+    if (e.target.id === 'drawer-add-save-btn') { requireEdit(saveNewTask); return; }
     if (e.target.id === 'drawer-add-cancel-btn') { document.getElementById('drawer-overlay').classList.add('hidden'); return; }
-    if (e.target.id === 'add-task-btn')        { openAddTaskDrawer(); return; }
+    if (e.target.id === 'add-task-btn')        { requireEdit(openAddTaskDrawer); return; }
 
     // Housing: show URL input
     const addBtn = e.target.closest('[data-housing-add]');
@@ -648,15 +727,15 @@ function setupEvents() {
 
     // Housing: submit URL
     const submitBtn = e.target.closest('[data-housing-submit]');
-    if (submitBtn) { submitHousingUrl(submitBtn.dataset.housingSubmit); return; }
+    if (submitBtn) { requireEdit(() => submitHousingUrl(submitBtn.dataset.housingSubmit)); return; }
 
     // Housing: select option
     const selBtn = e.target.closest('[data-housing-select]');
-    if (selBtn) { selectHousingOption(selBtn.dataset.housingSelect, selBtn.dataset.option); return; }
+    if (selBtn) { requireEdit(() => selectHousingOption(selBtn.dataset.housingSelect, selBtn.dataset.option)); return; }
 
     // Housing: delete option
     const delBtn = e.target.closest('[data-housing-delete]');
-    if (delBtn) { deleteHousingOption(delBtn.dataset.housingDelete, delBtn.dataset.option); return; }
+    if (delBtn) { requireEdit(() => deleteHousingOption(delBtn.dataset.housingDelete, delBtn.dataset.option)); return; }
 
     // Restaurant: show add form
     const restAddBtn = e.target.closest('[data-restaurant-add]');
@@ -687,24 +766,25 @@ function setupEvents() {
       const meal  = form.querySelector('[data-rf-meal]').value;
       const date  = form.querySelector('[data-rf-date]').value;
       const notes = form.querySelector('[data-rf-notes]').value.trim();
-      if (!name && !url) {
-        form.querySelector('[data-rf-name]').focus();
-        return;
-      }
-      restaurantData.push({ id: 'r_' + Date.now(), stopId: sid, url, name: name || 'View on Maps', meal, date, notes });
-      saveState();
-      renderRestaurants();
-      renderItinerary();
+      if (!name && !url) { form.querySelector('[data-rf-name]').focus(); return; }
+      requireEdit(() => {
+        restaurantData.push({ id: 'r_' + Date.now(), stopId: sid, url, name: name || 'View on Maps', meal, date, notes });
+        saveState();
+        renderRestaurants();
+        renderItinerary();
+      });
       return;
     }
 
     // Restaurant: delete card
     const restDel = e.target.closest('[data-restaurant-delete]');
     if (restDel) {
-      restaurantData = restaurantData.filter(r => r.id !== restDel.dataset.restaurantDelete);
-      saveState();
-      renderRestaurants();
-      renderItinerary();
+      requireEdit(() => {
+        restaurantData = restaurantData.filter(r => r.id !== restDel.dataset.restaurantDelete);
+        saveState();
+        renderRestaurants();
+        renderItinerary();
+      });
       return;
     }
 
@@ -713,7 +793,7 @@ function setupEvents() {
   // Housing: auto-save fields on blur; Enter submits URL input
   document.addEventListener('focusout', e => {
     const field = e.target.closest('[data-housing-field]');
-    if (field) updateHousingOption(field.dataset.stop, field.dataset.option, field.dataset.housingField, field.value);
+    if (field) requireEdit(() => updateHousingOption(field.dataset.stop, field.dataset.option, field.dataset.housingField, field.value));
   });
 
   document.addEventListener('input', e => {
@@ -1120,5 +1200,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupTweaksListener();
   setupEvents();
   renderAll();
+  updateLockIndicator();
   setInterval(renderHero, 60000);
 });

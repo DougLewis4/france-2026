@@ -2095,5 +2095,76 @@ body {
 }
 .leaflet-popup-tip-container { display: none; }
 
+/* ---------- Lock indicator ---------- */
+#lock-indicator { cursor: default; }
+#lock-indicator.unlocked { background: var(--olive-soft); color: var(--olive); border-color: var(--olive); }
+
+/* ---------- PIN modal ---------- */
+.pin-modal {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(42,36,32,0.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.pin-modal.hidden { display: none !important; }
+.pin-modal-box {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px 24px;
+  width: 100%; max-width: 320px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+.pin-modal-icon { font-size: 2rem; margin-bottom: 10px; }
+.pin-modal-title {
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.pin-modal-sub { font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 20px; }
+.pin-modal-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.4rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ff-mono);
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+}
+.pin-modal-input:focus { outline: none; border-color: var(--accent); }
+.pin-modal-error { font-size: 0.78rem; color: var(--urg-over); min-height: 18px; margin-bottom: 14px; }
+.pin-modal-actions { display: flex; gap: 8px; }
+.pin-modal-submit {
+  flex: 1; padding: 11px;
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: var(--radius-sm);
+  font: inherit; font-size: 0.85rem; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.15s;
+}
+.pin-modal-submit:hover { background: var(--accent); }
+.pin-modal-cancel {
+  padding: 11px 16px;
+  background: transparent; color: var(--ink-muted);
+  border: 1px solid var(--rule); border-radius: var(--radius-sm);
+  font: inherit; font-size: 0.85rem; cursor: pointer;
+  transition: all 0.15s;
+}
+.pin-modal-cancel:hover { border-color: var(--ink-soft); color: var(--ink); }
+@keyframes pin-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+.pin-shake { animation: pin-shake 0.4s ease; }
+
 /* ---------- utilities ---------- */
 .hidden { display: none !important; }
