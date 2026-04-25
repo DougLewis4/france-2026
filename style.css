@@ -1909,22 +1909,29 @@ body {
   color: var(--ink-muted);
   margin-bottom: 8px;
 }
-.itin-stay-link {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--accent);
-  text-decoration: none;
-  display: block;
+.itin-stay-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin-bottom: 4px;
 }
-.itin-stay-link:hover { text-decoration: underline; }
 .itin-stay-name {
   font-family: var(--ff-display);
   font-style: italic;
   font-size: 0.9rem;
   color: var(--ink);
-  margin-bottom: 4px;
+  flex: 1;
+  min-width: 0;
 }
+.itin-stay-link {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.itin-stay-link:hover { text-decoration: underline; }
 .itin-stay-notes {
   font-size: 0.78rem;
   color: var(--ink-soft);
